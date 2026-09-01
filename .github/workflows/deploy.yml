@@ -67,3 +67,23 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Safety net for as long as the Pages source stays "Deploy from a branch":
+  # GitHub's own legacy builder also runs on every push, needs no build step,
+  # and has been observed finishing 10-45s after the job above — overwriting
+  # this workflow's built site with the raw repository root. Re-publish the
+  # same artifact once that builder has had time to finish, so this build is
+  # what ends up live regardless of which one wins the race. Once the source
+  # is switched to "GitHub Actions" (see the warning in the build job above),
+  # the legacy builder stops running entirely and this job becomes a no-op
+  # safety net that can be deleted.
+  reclaim:
+    needs: deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - run: sleep 90
+      - id: deployment
+        uses: actions/deploy-pages@v4
