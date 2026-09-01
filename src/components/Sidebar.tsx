@@ -3,6 +3,8 @@ import type { OpeningLine } from "../data/openings";
 import { groupByFamily } from "../data/families";
 import type { LineProgress } from "../utils/storage";
 import type { PlayerColor } from "../hooks/useOpeningTrainer";
+import type { Theme } from "../hooks/useTheme";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface SidebarProps {
   lines: OpeningLine[];
@@ -10,9 +12,19 @@ interface SidebarProps {
   playerColor: PlayerColor;
   onSelect: (line: OpeningLine) => void;
   progress: Record<string, LineProgress>;
+  theme: Theme;
+  onToggleTheme: () => void;
 }
 
-export function Sidebar({ lines, selectedId, playerColor, onSelect, progress }: SidebarProps) {
+export function Sidebar({
+  lines,
+  selectedId,
+  playerColor,
+  onSelect,
+  progress,
+  theme,
+  onToggleTheme,
+}: SidebarProps) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -31,7 +43,10 @@ export function Sidebar({ lines, selectedId, playerColor, onSelect, progress }: 
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <h1>Opening Trainer</h1>
+        <div className="sidebar-header-row">
+          <h1>Opening Trainer</h1>
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+        </div>
         <p className="sidebar-subtitle">Drill chess openings until they're automatic.</p>
       </div>
       <input

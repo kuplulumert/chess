@@ -6,6 +6,7 @@ import { BoardPanel } from "./components/BoardPanel";
 import { InfoPanel } from "./components/InfoPanel";
 import { getAllProgress, recordCompletion } from "./utils/storage";
 import { useOpeningTrainer, type PlayerColor, type TrainerMode } from "./hooks/useOpeningTrainer";
+import { useTheme } from "./hooks/useTheme";
 import "./App.css";
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
   const [playerColor, setPlayerColor] = useState<PlayerColor>("w");
   const [mode, setMode] = useState<TrainerMode>("quiz");
   const [progress, setProgress] = useState(() => getAllProgress());
+  const { theme, toggleTheme } = useTheme();
 
   const line = openings.find((o) => o.id === selectedId) ?? openings[0];
   const trainer = useOpeningTrainer(line, playerColor, mode);
@@ -55,6 +57,8 @@ function App() {
         playerColor={playerColor}
         onSelect={handleSelect}
         progress={progress}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
       <main className="board-column">
         <BoardPanel

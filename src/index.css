@@ -17,7 +17,7 @@
   --mono: ui-monospace, "SF Mono", Consolas, monospace;
 
   font: 15px/1.5 var(--sans);
-  color-scheme: light dark;
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -26,22 +26,24 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #b8bcc6;
-    --text-h: #f0f1f4;
-    --text-muted: #888e9c;
-    --bg: #14151a;
-    --panel-bg: #1b1d24;
-    --border: #2b2e38;
-    --accent: #5cbf8a;
-    --accent-bg: rgba(92, 191, 138, 0.12);
-    --danger: #e17070;
-    --success: #5cbf8a;
-    --info: #7aa7e8;
-    --info-bg: rgba(122, 167, 232, 0.14);
-    --shadow: rgba(0, 0, 0, 0.4) 0 4px 16px -4px;
-  }
+/* Theme is chosen explicitly (default dark, toggled and persisted by
+   useTheme/ThemeToggle) rather than following the OS preference, so this
+   keys off the `data-theme` attribute set on <html> instead of a media query. */
+:root[data-theme="dark"] {
+  --text: #b8bcc6;
+  --text-h: #f0f1f4;
+  --text-muted: #888e9c;
+  --bg: #14151a;
+  --panel-bg: #1b1d24;
+  --border: #2b2e38;
+  --accent: #5cbf8a;
+  --accent-bg: rgba(92, 191, 138, 0.12);
+  --danger: #e17070;
+  --success: #5cbf8a;
+  --info: #7aa7e8;
+  --info-bg: rgba(122, 167, 232, 0.14);
+  --shadow: rgba(0, 0, 0, 0.4) 0 4px 16px -4px;
+  color-scheme: dark;
 }
 
 * {
