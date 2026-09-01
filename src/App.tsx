@@ -78,6 +78,7 @@ function App() {
         feedback={trainer.feedback}
         wrongAttempts={trainer.wrongAttempts}
         revealedHint={trainer.revealedHint}
+        currentComment={trainer.currentComment}
         onColorChange={setPlayerColor}
         onModeChange={setMode}
         onRestart={trainer.reset}

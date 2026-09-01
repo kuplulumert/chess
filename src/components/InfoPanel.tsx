@@ -1,5 +1,6 @@
 import type { OpeningLine } from "../data/openings";
 import type { MoveFeedback, PlayerColor, TrainerMode } from "../hooks/useOpeningTrainer";
+import { MovePurpose } from "./MovePurpose";
 
 interface InfoPanelProps {
   line: OpeningLine;
@@ -12,6 +13,7 @@ interface InfoPanelProps {
   feedback: MoveFeedback;
   wrongAttempts: number;
   revealedHint: string | null;
+  currentComment: string | null;
   onColorChange: (color: PlayerColor) => void;
   onModeChange: (mode: TrainerMode) => void;
   onRestart: () => void;
@@ -41,6 +43,7 @@ export function InfoPanel({
   feedback,
   wrongAttempts,
   revealedHint,
+  currentComment,
   onColorChange,
   onModeChange,
   onRestart,
@@ -112,6 +115,8 @@ export function InfoPanel({
           </button>
         </div>
       </div>
+
+      <MovePurpose comment={currentComment} moveIndex={moveIndex} />
 
       <div className="info-card status-card">
         <div className="progress-track" aria-hidden="true">

@@ -195,6 +195,22 @@
   line-height: 1.55;
 }
 
+.move-purpose {
+  background: var(--panel-bg);
+  transition: background-color 600ms ease;
+}
+
+.move-purpose-flash {
+  background: var(--accent-bg);
+  transition: none;
+}
+
+.move-purpose-text {
+  font-size: 13px;
+  color: var(--text-h);
+  line-height: 1.5;
+}
+
 .control-row {
   display: flex;
   align-items: center;
