@@ -67,9 +67,22 @@ function App() {
     setProgress(getAllProgress());
   }, [isDone, mode, line.id, playerColor]);
 
-  const handleSelect = useCallback((next: OpeningLine) => {
-    setSelectedId(next.id);
+  // Defences (Sicilian, French, Caro-Kann, ... and individual defensive
+  // lines like the Berlin Defence within Ruy Lopez) are trained as Black
+  // by default, since that's the side whose repertoire they actually are;
+  // everything else defaults to White. Looked up from the canonical
+  // English data so this doesn't depend on the current UI language.
+  const selectOpening = useCallback((id: string) => {
+    setSelectedId(id);
+    const canonical = openingsEn.find((o) => o.id === id);
+    const isDefence = canonical?.family.includes("Defence") || canonical?.name.includes("Defence");
+    setPlayerColor(isDefence ? "b" : "w");
   }, []);
+
+  const handleSelect = useCallback(
+    (next: OpeningLine) => selectOpening(next.id),
+    [selectOpening],
+  );
 
   const handleDrop = useCallback(
     (from: Square, to: Square) => trainer.attemptMove(from, to),
@@ -78,8 +91,8 @@ function App() {
 
   const handleNextLine = useCallback(() => {
     const index = openings.findIndex((o) => o.id === selectedId);
-    setSelectedId(openings[(index + 1) % openings.length].id);
-  }, [openings, selectedId]);
+    selectOpening(openings[(index + 1) % openings.length].id);
+  }, [openings, selectedId, selectOpening]);
 
   const handleRestart = useCallback(() => {
     setExtended(false);
