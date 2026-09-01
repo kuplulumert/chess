@@ -1,3 +1,8 @@
+export interface OpeningLineExtension {
+  moves: string[]; // 5 more plies, continuing on from `moves`.
+  comments: string[]; // One note per entry in `moves`, same convention.
+}
+
 export interface OpeningLine {
   id: string;
   family: string;
@@ -6,6 +11,8 @@ export interface OpeningLine {
   moves: string[]; // SAN, starting at 1.
   comments: string[]; // One short "why this move" note per entry in `moves`.
   description: string;
+  /** Optional 5-ply continuation offered once the base line is complete. */
+  extension?: OpeningLineExtension;
 }
 
 export const openings: OpeningLine[] = [
@@ -34,6 +41,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "A slow, classical build-up: both sides develop naturally and fight for the center before committing to a plan.",
+    extension: {
+      moves: ["Re1", "Re8", "Nbd2", "Bb6", "h3"],
+      comments: [
+        "Add another defender to e4.",
+        "Mirror the rook lift, support e5.",
+        "Develop the last minor piece, aim for Nf1-g3.",
+        "Tuck the bishop onto a safer diagonal.",
+        "Rule out ...Bg4 or ...Ng4 pins.",
+      ],
+    },
   },
   {
     id: "italian-evans-gambit",
@@ -60,6 +77,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "White sacrifices a pawn to seize the center and open lines for a quick attack on the black king.",
+    extension: {
+      moves: ["O-O", "d6", "cxd4", "Bb6", "Nc3"],
+      comments: [
+        "King safety before cashing in the initiative.",
+        "Solid development, decline grabbing more material.",
+        "Recapture, restore the pawn center.",
+        "Retreat the bishop off the a5-e1 diagonal.",
+        "Develop, add more pressure in the center.",
+      ],
+    },
   },
   {
     id: "ruy-lopez-berlin",
@@ -88,6 +115,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "The famous 'Berlin Wall': queens come off early and the position simplifies into a technical endgame battle.",
+    extension: {
+      moves: ["Qxd8+", "Kxd8", "Rd1+", "Ke8", "Nc3"],
+      comments: [
+        "Trade queens, head into the famous endgame.",
+        "Forced recapture, the king loses castling rights.",
+        "Check, gain a tempo on the king.",
+        "Step back to a safe square.",
+        "Develop, prepare to target the doubled pawns.",
+      ],
+    },
   },
   {
     id: "ruy-lopez-closed",
@@ -116,6 +153,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "The main line of the Ruy Lopez: a rich strategic struggle with slow maneuvering on both wings.",
+    extension: {
+      moves: ["c3", "O-O", "h3", "Na5", "Bc2"],
+      comments: [
+        "Prepare d4, support the bishop's retreat square.",
+        "King safety.",
+        "Rule out ...Bg4 or ...Ng4 pins.",
+        "The Chigorin maneuver: reroute toward c4.",
+        "Sidestep the knight, keep aiming at h7.",
+      ],
+    },
   },
   {
     id: "scotch-game",
@@ -137,6 +184,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "White opens the center immediately, trading pawns for quick piece activity.",
+    extension: {
+      moves: ["Nxc6", "bxc6", "Bd3", "d5", "exd5"],
+      comments: [
+        "Trade off the centralized knight.",
+        "Recapture, accept doubled pawns for the center.",
+        "Develop, eye the kingside.",
+        "Strike back in the center.",
+        "Capture, keep the extra structure simple.",
+      ],
+    },
   },
   {
     id: "petrov-defence",
@@ -163,6 +220,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "Black meets 1.e4 e5 symmetrically, aiming for a solid, drawish, well-tested structure.",
+    extension: {
+      moves: ["O-O", "Be7", "c4", "Nb4", "Be2"],
+      comments: [
+        "King safety.",
+        "Solid development, prepare to castle.",
+        "Gain space, expand on the queenside.",
+        "Harass the bishop, eye c2 and d3.",
+        "Retreat, keep the bishop safe.",
+      ],
+    },
   },
   {
     id: "vienna-game",
@@ -183,6 +250,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "White develops the knight before f4 or a fianchetto, keeping options flexible.",
+    extension: {
+      moves: ["Nxc3", "bxc3", "Bd6", "Ne2", "O-O"],
+      comments: [
+        "Trade, damage White's pawn structure.",
+        "Recapture, accept doubled pawns for open lines.",
+        "Develop toward the kingside.",
+        "Develop, prepare to castle.",
+        "King safety.",
+      ],
+    },
   },
   {
     id: "kings-gambit-accepted",
@@ -203,6 +280,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "A romantic, sharp gambit: White gives up a pawn for rapid development and attacking chances.",
+    extension: {
+      moves: ["Nf6", "d4", "d6", "Nd3", "Nxe4"],
+      comments: [
+        "Attack e4, add pressure.",
+        "Build a big center.",
+        "Support e5, prepare development.",
+        "Reroute the knight, prepare to recapture on f4.",
+        "Grab the pawn back, level material.",
+      ],
+    },
   },
   {
     id: "sicilian-najdorf",
@@ -231,6 +318,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "The most respected Sicilian: ...a6 prepares ...e5 and ...b5 while keeping the position flexible.",
+    extension: {
+      moves: ["O-O", "O-O", "Be3", "Be6", "Nd5"],
+      comments: [
+        "King safety.",
+        "King safety.",
+        "Develop, support d4 and prepare Qd2.",
+        "Complete development, eye a2 and d5.",
+        "Jump into the strong outpost.",
+      ],
+    },
   },
   {
     id: "sicilian-dragon",
@@ -259,6 +356,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "Black fianchettoes the bishop for long-diagonal pressure, usually leading to opposite-side castling races.",
+    extension: {
+      moves: ["Qd2", "Nc6", "O-O-O", "Nxd4", "Bxd4"],
+      comments: [
+        "Connect rooks, prepare to castle long.",
+        "Develop, add pressure on d4.",
+        "King safety, ready the attack.",
+        "Trade off the centralized knight.",
+        "Recapture, keep the bishop dominant on the long diagonal.",
+      ],
+    },
   },
   {
     id: "sicilian-sveshnikov",
@@ -285,6 +392,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "Black accepts a weak d5-square for active piece play and a lead in development.",
+    extension: {
+      moves: ["Bg5", "a6", "Na3", "b5", "Nd5"],
+      comments: [
+        "Pin the knight, add pressure on f6.",
+        "Kick the knight on b5.",
+        "Retreat, aim for c4 or d5 later.",
+        "Gain space, keep the knight out of c4.",
+        "Jump into the outpost the ...b5 push just weakened.",
+      ],
+    },
   },
   {
     id: "sicilian-rossolimo",
@@ -311,6 +428,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "White avoids the main theoretical battles by pinning/trading on c6 early.",
+    extension: {
+      moves: ["d4", "cxd4", "Nxd4", "O-O", "Nc3"],
+      comments: [
+        "Open the center after all.",
+        "Trade off White's d-pawn.",
+        "Recapture, centralize the knight.",
+        "King safety.",
+        "Develop the last knight.",
+      ],
+    },
   },
   {
     id: "french-advance",
@@ -332,6 +459,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "White grabs space with e5, and both sides fight over the d4/c-file structure.",
+    extension: {
+      moves: ["Be2", "cxd4", "cxd4", "Nh6", "Na3"],
+      comments: [
+        "Quiet development, prepare to castle.",
+        "Release the central tension.",
+        "Recapture, keep the pawn chain intact.",
+        "Reroute the knight toward f5.",
+        "Develop, aim for c2 or b5.",
+      ],
+    },
   },
   {
     id: "french-winawer",
@@ -358,6 +495,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "Black doubles White's c-pawns in exchange for a bishop pair concession, creating imbalanced play.",
+    extension: {
+      moves: ["Qg4", "Qc7", "Qxg7", "Rg8", "Qxh7"],
+      comments: [
+        "Attack g7, launch the sharp main line.",
+        "Counter-attack c3 instead of defending g7.",
+        "Grab the pawn, the position gets very sharp.",
+        "Attack the queen, gain time.",
+        "Grab a second pawn on the way out.",
+      ],
+    },
   },
   {
     id: "caro-kann-classical",
@@ -386,6 +533,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "A rock-solid setup for Black: the light-squared bishop escapes before ...e6 closes it in.",
+    extension: {
+      moves: ["h5", "Bh7", "Bd3", "Bxd3", "Qxd3"],
+      comments: [
+        "Chase the bishop to a worse square.",
+        "Retreat, the bishop is boxed in but safe.",
+        "Offer the trade, remove the good bishop.",
+        "Take the trade.",
+        "Recapture, the queen eyes the kingside.",
+      ],
+    },
   },
   {
     id: "caro-kann-advance",
@@ -407,6 +564,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "White claims space with e5; Black chips away at the center with ...c5.",
+    extension: {
+      moves: ["O-O", "Nc6", "Be3", "cxd4", "Nxd4"],
+      comments: [
+        "King safety.",
+        "Develop, add pressure on d4.",
+        "Support d4, prepare Nbd2 and c3.",
+        "Release the central tension.",
+        "Recapture, centralize the knight.",
+      ],
+    },
   },
   {
     id: "pirc-defence",
@@ -429,6 +596,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "Black allows White a big center and plans to strike back later with ...c5 or ...e5.",
+    extension: {
+      moves: ["Nc6", "Re1", "e5", "dxe5", "dxe5"],
+      comments: [
+        "Develop, add pressure on d4.",
+        "Support e4 in advance.",
+        "Strike back in the center.",
+        "Capture, open the center.",
+        "Recapture, keep the position balanced.",
+      ],
+    },
   },
   {
     id: "scandinavian-defence",
@@ -453,6 +630,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "Black recaptures on d5 with the queen immediately, accepting a small loss of time for simplicity.",
+    extension: {
+      moves: ["Bd2", "Bf5", "Qe2", "e6", "O-O-O"],
+      comments: [
+        "Unpin the knight, prepare to castle long.",
+        "Develop the bishop before ...e6 shuts it in.",
+        "Connect rooks, prepare O-O-O.",
+        "Solid development, free the f8-bishop.",
+        "King safety, aim the rook at the queen.",
+      ],
+    },
   },
   {
     id: "qgd-main-line",
@@ -480,6 +667,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "A classical, rock-solid structure for Black; White develops naturally and pressures d5.",
+    extension: {
+      moves: ["b6", "cxd5", "Nxd5", "Bxe7", "Qxe7"],
+      comments: [
+        "Prepare to fianchetto the light-squared bishop.",
+        "Resolve the central tension.",
+        "Recapture, centralize the knight.",
+        "Trade off the dark-squared bishops.",
+        "Recapture, keep the position solid.",
+      ],
+    },
   },
   {
     id: "qga-main-line",
@@ -501,6 +698,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "Black grabs the c4-pawn temporarily; White regains it while developing with tempo.",
+    extension: {
+      moves: ["O-O", "a6", "Qe2", "b5", "Bb3"],
+      comments: [
+        "King safety.",
+        "Prepare ...b5, gain queenside space.",
+        "Connect rooks, eye the e-file.",
+        "Gain more space, push the bishop back.",
+        "Retreat, keep eyeing f7.",
+      ],
+    },
   },
   {
     id: "slav-defence",
@@ -522,6 +729,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "Black supports d5 with the c-pawn, keeping the dark-squared bishop free unlike the QGD.",
+    extension: {
+      moves: ["e3", "e6", "Bxc4", "Bb4", "O-O"],
+      comments: [
+        "Free the dark-squared bishop, prepare to recapture on c4.",
+        "Solid development, free the f8-bishop.",
+        "Recapture, develop with tempo-free safety.",
+        "Pin the knight, pressure c3/e4.",
+        "King safety.",
+      ],
+    },
   },
   {
     id: "kings-indian-defence",
@@ -548,6 +765,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "Black lets White build a big center, then counter-attacks it with ...e5 or ...c5 and kingside play.",
+    extension: {
+      moves: ["O-O", "Nc6", "d5", "Ne7", "Ne1"],
+      comments: [
+        "King safety.",
+        "Add pressure on d4, provoke d5.",
+        "Close the center, gain space.",
+        "Reroute the knight toward f5 or g6.",
+        "Reroute the knight, prepare f3 and f4.",
+      ],
+    },
   },
   {
     id: "nimzo-indian-defence",
@@ -569,6 +796,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "Black pins the knight on c3 to control e4 and pressure White's center before it fully forms.",
+    extension: {
+      moves: ["Nf3", "c5", "O-O", "Nc6", "a3"],
+      comments: [
+        "Develop, defend d4.",
+        "Strike at the center from the side.",
+        "King safety.",
+        "Develop, add pressure on d4.",
+        "Force the bishop to decide, prepare doubled pawns.",
+      ],
+    },
   },
   {
     id: "grunfeld-defence",
@@ -595,6 +832,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "Black allows White a huge pawn center, then attacks it immediately with active piece play.",
+    extension: {
+      moves: ["Bc4", "c5", "Ne2", "Nc6", "Be3"],
+      comments: [
+        "Develop, aim at f7 and the long diagonal's rival.",
+        "Strike at the big center immediately.",
+        "Develop, prepare to castle without blocking the c-pawn.",
+        "Develop, add more pressure on d4.",
+        "Support d4, prepare Qd2.",
+      ],
+    },
   },
   {
     id: "english-opening",
@@ -620,6 +867,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "A flexible flank opening; White plays a Sicilian Defence with an extra tempo.",
+    extension: {
+      moves: ["Nb6", "O-O", "Be7", "d3", "O-O"],
+      comments: [
+        "Retreat the knight to a safe, active square.",
+        "King safety.",
+        "Solid development, prepare to castle.",
+        "Solidify the center, free the bishop.",
+        "King safety.",
+      ],
+    },
   },
   {
     id: "london-system",
@@ -644,6 +901,16 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "A simple, reliable setup for White with Bf4/e3/Bd3/Nbd2, playable against almost anything Black tries.",
+    extension: {
+      moves: ["Bd3", "Bxg3", "hxg3", "c5", "c3"],
+      comments: [
+        "Offer the trade of dark-squared bishops.",
+        "Take the trade.",
+        "Recapture, the h-file opens for the rook.",
+        "Strike at the center from the side.",
+        "Support d4, keep the structure solid.",
+      ],
+    },
   },
   {
     id: "catalan-opening",
@@ -669,5 +936,15 @@ export const openings: OpeningLine[] = [
     ],
     description:
       "White fianchettoes the bishop to combine queen's-pawn structures with long-diagonal pressure.",
+    extension: {
+      moves: ["dxc4", "Qc2", "a6", "Qxc4", "b5"],
+      comments: [
+        "Grab the pawn, invite the Open Catalan.",
+        "Prepare to recapture on c4.",
+        "Prepare ...b5, defend the extra pawn.",
+        "Recapture, level the material.",
+        "Gain space, push the queen back.",
+      ],
+    },
   },
 ];

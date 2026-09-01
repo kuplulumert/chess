@@ -8,6 +8,16 @@ export function getLocalizedOpenings(language: Language): OpeningLine[] {
   return openingsEn.map((line) => {
     const tr = openingsTr[line.id];
     if (!tr) return line;
-    return { ...line, family: tr.family, name: tr.name, description: tr.description, comments: tr.comments };
+    return {
+      ...line,
+      family: tr.family,
+      name: tr.name,
+      description: tr.description,
+      comments: tr.comments,
+      extension:
+        line.extension && tr.extensionComments
+          ? { moves: line.extension.moves, comments: tr.extensionComments }
+          : line.extension,
+    };
   });
 }

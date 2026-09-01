@@ -7,6 +7,8 @@ export interface OpeningLineTranslation {
   name: string;
   description: string;
   comments: string[];
+  /** Translated comments for the line's optional `extension`, same length as its moves. */
+  extensionComments?: string[];
 }
 
 export const openingsTr: Record<string, OpeningLineTranslation> = {
@@ -29,6 +31,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Şahı güvene al.",
       "Şah da güvene alınsın.",
     ],
+    extensionComments: [
+      "e4'e bir savunucu daha ekle.",
+      "Kale kaldırışını yansıt, e5'i destekle.",
+      "Son hafif taşı geliştir, At(f1)-g3'e hedeflen.",
+      "Fili daha güvenli bir çapraza çek.",
+      "...Fg4 ya da ...Ag4 bağlarını önle.",
+    ],
   },
   "italian-evans-gambit": {
     family: "İtalyan Oyunu",
@@ -48,6 +57,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Geri çekil ama c3 baskısını sürdür.",
       "Devasa bir merkez kur.",
       "Fazla piyonu al.",
+    ],
+    extensionComments: [
+      "İnisiyatifi nakde çevirmeden önce şahı güvene al.",
+      "Sağlam gelişim, daha fazla malzeme almaktan vazgeç.",
+      "Geri al, piyon merkezini onar.",
+      "Fili a5-e1 çaprazından çek.",
+      "Geliştir, merkeze baskıyı artır.",
     ],
   },
   "ruy-lopez-berlin": {
@@ -71,6 +87,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "e5 piyonunu kazan.",
       "Atı d4/e3'e yönlendir.",
     ],
+    extensionComments: [
+      "Vezirleri takas et, ünlü finale gir.",
+      "Zorunlu geri alış, şah rok hakkını kaybeder.",
+      "Şah çek, şahtan tempo kazan.",
+      "Güvenli bir kareye çekil.",
+      "Geliştir, çift piyonları hedeflemeye hazırlan.",
+    ],
   },
   "ruy-lopez-closed": {
     family: "İspanyol Açılışı",
@@ -93,6 +116,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "f7'yi gözetlemeye devam et.",
       "e5'i destekle, fili serbest bırak.",
     ],
+    extensionComments: [
+      "d4'e hazırlan, filin çekilme karesini destekle.",
+      "Şahı güvene al.",
+      "...Fg4 ya da ...Ag4 bağlarını önle.",
+      "Chigorin manevrası: c4'e yönel.",
+      "Attan kaç, h7'yi gözetlemeye devam et.",
+    ],
   },
   "scotch-game": {
     family: "İskoç Oyunu",
@@ -109,6 +139,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "e4'e saldır, geliştir.",
       "e4'ü savun, geliştir.",
       "Atı şaşa bağla, e4'e baskı yap.",
+    ],
+    extensionComments: [
+      "Merkezdeki atı takas et.",
+      "Geri al, merkez karşılığında çift piyonları kabul et.",
+      "Geliştir, şah kanadını gözetle.",
+      "Merkeze karşılık ver.",
+      "Al, yapıyı sade tut.",
     ],
   },
   "petrov-defence": {
@@ -130,6 +167,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Geliştir, şah kanadını gözetle.",
       "Geliştir, d4'e baskı yap.",
     ],
+    extensionComments: [
+      "Şahı güvene al.",
+      "Sağlam gelişim, rokete hazırlan.",
+      "Alan kazan, vezir kanadında genişle.",
+      "File taciz et, c2 ve d3'ü gözetle.",
+      "Geri çekil, fili güvende tut.",
+    ],
   },
   "vienna-game": {
     family: "Viyana Oyunu",
@@ -146,6 +190,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Geri al, atı merkeze yerleştir.",
       "Fianket yap, uzun çapraza baskı yap.",
     ],
+    extensionComments: [
+      "Takas et, Beyazın piyon yapısına zarar ver.",
+      "Geri al, açık hatlar karşılığında çift piyonları kabul et.",
+      "Şah kanadına doğru geliştir.",
+      "Geliştir, rokete hazırlan.",
+      "Şahı güvene al.",
+    ],
   },
   "kings-gambit-accepted": {
     family: "Şah Gambiti",
@@ -161,6 +212,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Piyon zincirini baltala.",
       "Piyonu koru, atı uzaklaştır.",
       "Gelişimde büyük bir avantaj için tekrar feda et.",
+    ],
+    extensionComments: [
+      "e4'e saldır, baskı ekle.",
+      "Büyük bir merkez kur.",
+      "e5'i destekle, gelişime hazırlan.",
+      "Atı yönlendir, f4'te geri almaya hazırlan.",
+      "Piyonu geri kazan, malzemeyi eşitle.",
     ],
   },
   "sicilian-najdorf": {
@@ -184,6 +242,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Güvenli bir kareye çekil.",
       "Gelişimi tamamla, rokete hazırlan.",
     ],
+    extensionComments: [
+      "Şahı güvene al.",
+      "Şahı güvene al.",
+      "Geliştir, d4'ü destekle ve Vd2'ye hazırlan.",
+      "Gelişimi tamamla, a2 ve d5'i gözetle.",
+      "Güçlü karakola atla.",
+    ],
   },
   "sicilian-dragon": {
     family: "Sicilya Savunması",
@@ -206,6 +271,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "e4'ü sağlamlaştır, g4 saldırısına hazırlan.",
       "Fırtına öncesi şahı güvene al.",
     ],
+    extensionComments: [
+      "Kaleleri birleştir, uzun rokete hazırlan.",
+      "Geliştir, d4'e baskı ekle.",
+      "Şahı güvene al, saldırıya hazırlan.",
+      "Merkezdeki atı takas et.",
+      "Geri al, fili uzun çaprazda hakim tut.",
+    ],
   },
   "sicilian-sveshnikov": {
     family: "Sicilya Savunması",
@@ -224,6 +296,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Alan kazan, atı kov, d5'i zayıflat.",
       "İleri karakola atla, d6'yı gözetle.",
       "b5'teki atın hedef karesini kapat.",
+    ],
+    extensionComments: [
+      "Atı şaşa bağla, f6'ya baskı ekle.",
+      "b5'teki atı kov.",
+      "Geri çekil, sonra c4 ya da d5'i hedefle.",
+      "Alan kazan, atı c4'ten uzak tut.",
+      "...b5'in zayıflattığı karakola atla.",
     ],
   },
   "sicilian-rossolimo": {
@@ -244,6 +323,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Alan kazan, atı kov.",
       "Atı güçlü bir kareye yönlendir.",
     ],
+    extensionComments: [
+      "Merkezi sonunda aç.",
+      "Beyazın d-piyonunu takas et.",
+      "Geri al, atı merkeze yerleştir.",
+      "Şahı güvene al.",
+      "Son atı geliştir.",
+    ],
   },
   "french-advance": {
     family: "Fransız Savunması",
@@ -260,6 +346,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "d4'e baskıyı artır.",
       "d4'ü savun, geliştir.",
       "d4 ve b2'ye daha fazla baskı yap.",
+    ],
+    extensionComments: [
+      "Sakin gelişim, rokete hazırlan.",
+      "Merkezdeki gerilimi çöz.",
+      "Geri al, piyon zincirini koru.",
+      "Atı f5'e yönlendir.",
+      "Geliştir, c2 ya da b5'i hedefle.",
     ],
   },
   "french-winawer": {
@@ -280,6 +373,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Takas et, Beyazın vezir kanadı piyonlarını boz.",
       "Geri al, fil çifti karşılığında çift piyonları kabul et.",
       "Geliştir, ...At-f5 ya da ...rokete hazırlan.",
+    ],
+    extensionComments: [
+      "g7'ye saldır, keskin ana varyantı başlat.",
+      "g7'yi savunmak yerine c3'e karşı saldır.",
+      "Piyonu al, pozisyon çok keskinleşir.",
+      "Vezire saldır, zaman kazan.",
+      "Çıkış yolunda ikinci bir piyon daha al.",
     ],
   },
   "caro-kann-classical": {
@@ -302,6 +402,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Geliştir, Fd3 ve rokete hazırlan.",
       "Geliştir, ...At(g)f6'ya hazırlan.",
     ],
+    extensionComments: [
+      "Fili daha kötü bir kareye kov.",
+      "Geri çekil, fil sıkışık ama güvende.",
+      "Takas öner, iyi fili kaldır.",
+      "Takası kabul et.",
+      "Geri al, vezir şah kanadını gözetler.",
+    ],
   },
   "caro-kann-advance": {
     family: "Caro-Kann Savunması",
@@ -318,6 +425,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "d5'i destekle, gelişime hazırlan.",
       "Sakin gelişim, rokete hazırlan.",
       "Piyon zincirinin tabanına saldır.",
+    ],
+    extensionComments: [
+      "Şahı güvene al.",
+      "Geliştir, d4'e baskı ekle.",
+      "d4'ü destekle, Ad2 ve c3'e hazırlan.",
+      "Merkezdeki gerilimi çöz.",
+      "Geri al, atı merkeze yerleştir.",
     ],
   },
   "pirc-defence": {
@@ -337,6 +451,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Şahı güvene al.",
       "Şahı güvene al.",
     ],
+    extensionComments: [
+      "Geliştir, d4'e baskı ekle.",
+      "e4'ü önceden destekle.",
+      "Merkeze karşılık ver.",
+      "Al, merkezi aç.",
+      "Geri al, pozisyonu dengede tut.",
+    ],
   },
   "scandinavian-defence": {
     family: "İskandinav Savunması",
@@ -354,6 +475,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Geliştir, ...Ff5 ya da ...Fg4'e hazırlan.",
       "Geliştir, Fd2 ve rokete hazırlan.",
       "Vezire c7'de bir çekilme karesi ver.",
+    ],
+    extensionComments: [
+      "Atın bağını çöz, uzun rokete hazırlan.",
+      "...e6 onu kapatmadan fili geliştir.",
+      "Kaleleri birleştir, uzun rokete hazırlan.",
+      "Sağlam gelişim, f8 filini serbest bırak.",
+      "Şahı güvene al, kaleyi vezire yönelt.",
     ],
   },
   "qgd-main-line": {
@@ -375,6 +503,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "File soru sor.",
       "Bağı canlı tut.",
     ],
+    extensionComments: [
+      "Açık kareli fili fiankete hazırla.",
+      "Merkezdeki gerilimi çöz.",
+      "Geri al, atı merkeze yerleştir.",
+      "Koyu kareli filleri takas et.",
+      "Geri al, pozisyonu sağlam tut.",
+    ],
   },
   "qga-main-line": {
     family: "Vezir Gambiti Kabulü",
@@ -391,6 +526,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Sağlam gelişim, ...c5'e hazırlan.",
       "Geri al, bedava tempoyla geliştir.",
       "Merkeze karşılık ver.",
+    ],
+    extensionComments: [
+      "Şahı güvene al.",
+      "...b5'e hazırlan, vezir kanadında alan kazan.",
+      "Kaleleri birleştir, e-hattını gözetle.",
+      "Daha fazla alan kazan, fili geri it.",
+      "Geri çekil, f7'yi gözetlemeye devam et.",
     ],
   },
   "slav-defence": {
@@ -409,6 +551,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Fil serbest kaldığına göre piyonu al.",
       "Fazla piyonu savunan ...b5'i önle.",
       "...e6 onu kapatmadan fili geliştir.",
+    ],
+    extensionComments: [
+      "Koyu kareli fili serbest bırak, c4'te geri almaya hazırlan.",
+      "Sağlam gelişim, f8 filini serbest bırak.",
+      "Geri al, bedava güvenle geliştir.",
+      "Atı şaşa bağla, c3/e4'e baskı yap.",
+      "Şahı güvene al.",
     ],
   },
   "kings-indian-defence": {
@@ -430,6 +579,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Sakin gelişim, rokete hazırlan.",
       "Beyazın merkezine karşılık ver.",
     ],
+    extensionComments: [
+      "Şahı güvene al.",
+      "d4'e baskı ekle, d5'i kışkırt.",
+      "Merkezi kapat, alan kazan.",
+      "Atı f5 ya da g6'ya yönlendir.",
+      "Atı yönlendir, f3 ve f4'e hazırlan.",
+    ],
   },
   "nimzo-indian-defence": {
     family: "Nimzo-Hint Savunması",
@@ -447,6 +603,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Şahı güvene al.",
       "Şah kanadına doğru geliştir.",
       "Merkeze karşılık ver.",
+    ],
+    extensionComments: [
+      "Geliştir, d4'ü savun.",
+      "Merkeze yandan vur.",
+      "Şahı güvene al.",
+      "Geliştir, d4'e baskı ekle.",
+      "File karar verdir, çift piyonlara hazırlan.",
     ],
   },
   "grunfeld-defence": {
@@ -468,6 +631,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Geri al, büyük bir merkez karşılığında çift piyonları kabul et.",
       "Fianket yap, merkezi hedef al.",
     ],
+    extensionComments: [
+      "Geliştir, f7'yi ve rakip uzun çaprazı hedefle.",
+      "Büyük merkeze hemen vur.",
+      "Geliştir, c-piyonunu kapatmadan rokete hazırlan.",
+      "Geliştir, d4'e daha fazla baskı ekle.",
+      "d4'ü destekle, Vd2'ye hazırlan.",
+    ],
   },
   "english-opening": {
     family: "İngiliz Açılışı",
@@ -485,6 +655,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Piyonu al.",
       "Geri al, atı merkeze yerleştir.",
       "Fianket yap, uzun çapraza baskı yap.",
+    ],
+    extensionComments: [
+      "Atı güvenli, aktif bir kareye çek.",
+      "Şahı güvene al.",
+      "Sağlam gelişim, rokete hazırlan.",
+      "Merkezi sağlamlaştır, fili serbest bırak.",
+      "Şahı güvene al.",
     ],
   },
   "london-system": {
@@ -504,6 +681,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Fili aktif tut, takastan kaçın.",
       "Şahı güvene al.",
     ],
+    extensionComments: [
+      "Koyu kareli fillerin takasını öner.",
+      "Takası kabul et.",
+      "Geri al, kale için h-hattı açılır.",
+      "Merkeze yandan vur.",
+      "d4'ü destekle, yapıyı sağlam tut.",
+    ],
   },
   "catalan-opening": {
     family: "Katalan Açılışı",
@@ -522,6 +706,13 @@ export const openingsTr: Record<string, OpeningLineTranslation> = {
       "Geliştir, d4 ve e5'i destekle.",
       "Şahı güvene al.",
       "Şahı güvene al.",
+    ],
+    extensionComments: [
+      "Piyonu al, Açık Katalan'a davet çıkar.",
+      "c4'te geri almaya hazırlan.",
+      "...b5'e hazırlan, fazla piyonu savun.",
+      "Geri al, malzemeyi eşitle.",
+      "Alan kazan, veziri geri it.",
     ],
   },
 };

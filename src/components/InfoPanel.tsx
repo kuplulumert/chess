@@ -16,12 +16,14 @@ interface InfoPanelProps {
   revealedHint: string | null;
   currentComment: string | null;
   isPlayerTurn: boolean;
+  canExtend: boolean;
   t: Dictionary;
   onColorChange: (color: PlayerColor) => void;
   onModeChange: (mode: TrainerMode) => void;
   onRestart: () => void;
   onHint: () => void;
   onNextLine: () => void;
+  onExtend: () => void;
 }
 
 function formatHistory(history: string[]): string {
@@ -48,12 +50,14 @@ export function InfoPanel({
   revealedHint,
   currentComment,
   isPlayerTurn,
+  canExtend,
   t,
   onColorChange,
   onModeChange,
   onRestart,
   onHint,
   onNextLine,
+  onExtend,
 }: InfoPanelProps) {
   const progressPercent = totalMoves === 0 ? 0 : Math.round((moveIndex / totalMoves) * 100);
   const colorLabel = playerColor === "w" ? t.white : t.black;
@@ -146,6 +150,14 @@ export function InfoPanel({
                 {t.nextOpening}
               </button>
             </div>
+            {canExtend && (
+              <div className="extend-offer">
+                <p className="extend-offer-text">{t.extendPrompt}</p>
+                <button type="button" className="secondary-button" onClick={onExtend}>
+                  {t.extendButton}
+                </button>
+              </div>
+            )}
           </>
         ) : mode === "study" ? (
           <p className="status-line">{t.replayingLine}</p>

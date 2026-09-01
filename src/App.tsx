@@ -17,12 +17,38 @@ function App() {
   const [playerColor, setPlayerColor] = useState<PlayerColor>("w");
   const [mode, setMode] = useState<TrainerMode>("quiz");
   const [progress, setProgress] = useState(() => getAllProgress());
+  const [extended, setExtended] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { language, t, toggleLanguage } = useLanguage();
 
   const openings = useMemo(() => getLocalizedOpenings(language), [language]);
   const line = openings.find((o) => o.id === selectedId) ?? openings[0];
-  const trainer = useOpeningTrainer(line, playerColor, mode);
+
+  // A fresh run (new opening, new color, or new mode) always starts at the
+  // base depth; the trainee re-opts into the extension each time. Reset
+  // synchronously during render (React's documented pattern for this) rather
+  // than in an effect, which would need an extra render to take effect.
+  const runKey = `${selectedId}:${playerColor}:${mode}`;
+  const [activeRunKey, setActiveRunKey] = useState(runKey);
+  if (activeRunKey !== runKey) {
+    setActiveRunKey(runKey);
+    setExtended(false);
+  }
+
+  // A run's own line stays untouched until the trainee opts in to the extra
+  // 5 plies via the "extend" offer shown once the base line is complete —
+  // extending swaps in a longer moves/comments list under the same id, so
+  // useOpeningTrainer picks up right where it left off instead of resetting.
+  const activeLine = useMemo(() => {
+    if (!extended || !line.extension) return line;
+    return {
+      ...line,
+      moves: [...line.moves, ...line.extension.moves],
+      comments: [...line.comments, ...line.extension.comments],
+    };
+  }, [line, extended]);
+
+  const trainer = useOpeningTrainer(activeLine, playerColor, mode);
 
   // Record a completion once per run-through of a line, not once per render.
   const recordedRef = useRef<string | null>(null);
@@ -53,6 +79,15 @@ function App() {
     const index = openings.findIndex((o) => o.id === selectedId);
     setSelectedId(openings[(index + 1) % openings.length].id);
   }, [openings, selectedId]);
+
+  const handleRestart = useCallback(() => {
+    setExtended(false);
+    trainer.reset();
+  }, [trainer]);
+
+  const handleExtend = useCallback(() => {
+    setExtended(true);
+  }, []);
 
   return (
     <div className="app-shell">
@@ -93,12 +128,14 @@ function App() {
         revealedHint={trainer.revealedHint}
         currentComment={trainer.currentComment}
         isPlayerTurn={trainer.isPlayerTurn}
+        canExtend={Boolean(line.extension) && !extended}
         t={t}
         onColorChange={setPlayerColor}
         onModeChange={setMode}
-        onRestart={trainer.reset}
+        onRestart={handleRestart}
         onHint={trainer.requestHint}
         onNextLine={handleNextLine}
+        onExtend={handleExtend}
       />
     </div>
   );

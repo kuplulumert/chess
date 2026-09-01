@@ -37,6 +37,9 @@ export interface Dictionary {
 
   howToUse: string;
   dismissGuide: string;
+
+  extendPrompt: string;
+  extendButton: string;
 }
 
 const en: Dictionary = {
@@ -77,6 +80,9 @@ const en: Dictionary = {
   howToUse:
     "Pick a line on the left, then choose White or Black — you can drill the same opening from either side. Play the moves yourself in Quiz mode, or watch them play out in Study mode.",
   dismissGuide: "Dismiss",
+
+  extendPrompt: "Want to go deeper into this line?",
+  extendButton: "+5 more moves",
 };
 
 const tr: Dictionary = {
@@ -117,6 +123,9 @@ const tr: Dictionary = {
   howToUse:
     "Soldan bir açılış seç, sonra Beyaz ya da Siyah tarafı seç — aynı açılışı iki taraftan da çalışabilirsin. Hamleleri Quiz modunda kendin oyna, ya da Çalışma modunda nasıl oynandığını izle.",
   dismissGuide: "Kapat",
+
+  extendPrompt: "Bu açılışta biraz daha derine inmek ister misin?",
+  extendButton: "+5 hamle daha",
 };
 
 export const dictionaries: Record<Language, Dictionary> = { en, tr };
