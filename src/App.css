@@ -359,16 +359,24 @@
   color: var(--text);
   font-size: 12px;
   padding: 6px 12px;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
 .segmented button + button {
   border-left: 1px solid var(--border);
 }
 
-.segmented-active {
-  background: var(--accent-bg);
-  color: var(--text-h);
-  font-weight: 600;
+.segmented button.segmented-active {
+  background: var(--accent);
+  color: var(--panel-bg);
+  font-weight: 700;
+}
+
+.segmented-active + button,
+button + .segmented-active {
+  border-left-color: transparent;
 }
 
 .button-row {
