@@ -136,7 +136,7 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--text-muted);
+  color: var(--text-h);
   margin: 14px 0 6px;
   padding-left: 4px;
 }
@@ -172,10 +172,15 @@
   background: var(--accent-bg);
 }
 
-.opening-item-active {
-  background: var(--accent-bg);
-  color: var(--text-h);
-  font-weight: 600;
+/* Also styled on :hover so a stronger, solid highlight (matching the
+   Play as/Mode segmented control) can't be overridden by the plain
+   :hover rule above, which otherwise wins on specificity when the
+   selected item itself is hovered. */
+.opening-item-active,
+.opening-item-active:hover {
+  background: var(--accent);
+  color: var(--panel-bg);
+  font-weight: 700;
 }
 
 .opening-eco {
@@ -183,6 +188,11 @@
   font-size: 11px;
   color: var(--text-muted);
   min-width: 28px;
+}
+
+.opening-item-active .opening-eco {
+  color: var(--panel-bg);
+  opacity: 0.85;
 }
 
 .opening-name {
@@ -195,6 +205,10 @@
 .opening-mastered {
   color: var(--success);
   font-size: 12px;
+}
+
+.opening-item-active .opening-mastered {
+  color: var(--panel-bg);
 }
 
 .empty-state {
