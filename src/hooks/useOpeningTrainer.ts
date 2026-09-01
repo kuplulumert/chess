@@ -53,7 +53,7 @@ export function useOpeningTrainer(line: OpeningLine, playerColor: PlayerColor, m
   }
 
   const isDone = moveIndex >= line.moves.length;
-  const isPlayerTurn = mode === "quiz" && !isDone && moveColor(moveIndex) === playerColor;
+  const isPlayerTurn = !isDone && moveColor(moveIndex) === playerColor;
   const isOpponentTurn = !isDone && moveColor(moveIndex) !== playerColor;
 
   const applyBookMove = useCallback((index: number) => {
@@ -79,11 +79,11 @@ export function useOpeningTrainer(line: OpeningLine, playerColor: PlayerColor, m
     setHintRequested(false);
   }, []);
 
-  // Auto-play the opponent's (or, in study mode, everyone's) book moves.
+  // Auto-play only the opponent's book moves — in both modes, the trainee
+  // always plays their own chosen color's moves themselves.
   useEffect(() => {
     if (isDone) return;
-    const shouldAutoPlay = mode === "study" || moveColor(moveIndex) !== playerColor;
-    if (!shouldAutoPlay) return;
+    if (moveColor(moveIndex) === playerColor) return;
 
     timeoutRef.current = window.setTimeout(() => {
       applyBookMove(moveIndex);
@@ -92,7 +92,7 @@ export function useOpeningTrainer(line: OpeningLine, playerColor: PlayerColor, m
     return () => {
       if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
     };
-  }, [moveIndex, isDone, mode, playerColor, applyBookMove]);
+  }, [moveIndex, isDone, playerColor, applyBookMove]);
 
   const attemptMove = useCallback(
     (from: Square, to: Square): boolean => {
@@ -123,7 +123,7 @@ export function useOpeningTrainer(line: OpeningLine, playerColor: PlayerColor, m
     [game, isPlayerTurn, line.moves, moveIndex, applyBookMove],
   );
 
-  const showHint = hintRequested || wrongAttempts >= WRONG_ATTEMPTS_BEFORE_HINT;
+  const showHint = mode === "study" || hintRequested || wrongAttempts >= WRONG_ATTEMPTS_BEFORE_HINT;
   const revealedHint = showHint && !isDone ? line.moves[moveIndex] : null;
 
   // Derived from moveIndex rather than game.history(): chess.js loses move history

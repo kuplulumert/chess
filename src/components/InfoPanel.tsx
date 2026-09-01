@@ -179,7 +179,7 @@ export function InfoPanel({
               </div>
             )}
           </>
-        ) : mode === "study" ? (
+        ) : !isPlayerTurn ? (
           <p className="status-line">{t.replayingLine}</p>
         ) : (
           <>
