@@ -7,6 +7,7 @@
   --border: #e1e3e8;
   --accent: #2f6f4f;
   --accent-bg: rgba(47, 111, 79, 0.1);
+  --accent-rgb: 47, 111, 79;
   --danger: #c23b3b;
   --success: #2f7a4f;
   --info: #2657a3;
@@ -39,6 +40,7 @@
   --border: #2b2e38;
   --accent: #5cbf8a;
   --accent-bg: rgba(92, 191, 138, 0.12);
+  --accent-rgb: 92, 191, 138;
   --danger: #e17070;
   --success: #5cbf8a;
   --info: #8fb8f4;
