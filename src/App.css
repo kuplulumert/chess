@@ -247,20 +247,27 @@
   line-height: 1.5;
 }
 
-/* Gently pulses only while the trainee actually has to pick the next move,
-   so their eye is drawn here before they play — not during auto-played
-   moves or once the line is finished. */
+/* Pulses only while the trainee actually has to pick the next move, so
+   their eye is drawn here before they play — not during auto-played
+   moves or once the line is finished. Deliberately strong: this is meant
+   to be caught out of the corner of the eye, not just noticed on close look. */
 .move-purpose-attention {
-  animation: move-purpose-pulse 2.4s ease-in-out infinite;
+  animation: move-purpose-pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes move-purpose-pulse {
   0%,
   100% {
-    box-shadow: var(--shadow), 0 0 0 0 rgba(var(--info-rgb), 0.45);
+    box-shadow:
+      var(--shadow),
+      inset 0 0 0 0 rgba(var(--info-rgb), 0),
+      0 0 0 0 rgba(var(--info-rgb), 0.6);
   }
   50% {
-    box-shadow: var(--shadow), 0 0 0 6px rgba(var(--info-rgb), 0);
+    box-shadow:
+      var(--shadow),
+      inset 0 0 26px 2px rgba(var(--info-rgb), 0.35),
+      0 0 22px 6px rgba(var(--info-rgb), 0.9);
   }
 }
 

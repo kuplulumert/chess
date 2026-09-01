@@ -37,7 +37,7 @@ export function MovePurpose({ comment, moveIndex, awaitingMove }: MovePurposePro
 
   return (
     <div className={className}>
-      <h3 className="moves-title">Why this move</h3>
+      <h3 className="moves-title">Move Hint</h3>
       <p className="move-purpose-text">{comment}</p>
     </div>
   );
