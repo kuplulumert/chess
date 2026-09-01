@@ -140,14 +140,14 @@ export function InfoPanel({
       />
 
       {whiteStrategy && (
-        <div className="info-card">
+        <div className="info-card strategy-card-white">
           <h3 className="moves-title">{t.white}</h3>
           <p className="strategy-text">{whiteStrategy}</p>
         </div>
       )}
 
       {blackStrategy && (
-        <div className="info-card">
+        <div className="info-card strategy-card-black">
           <h3 className="moves-title">{t.black}</h3>
           <p className="strategy-text">{blackStrategy}</p>
         </div>

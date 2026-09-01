@@ -13,6 +13,10 @@
   --info: #2657a3;
   --info-bg: #d6e6fb;
   --info-rgb: 38, 87, 163;
+  --white-side: #a97a1f;
+  --white-side-bg: #fbf0da;
+  --black-side: #5b4b8a;
+  --black-side-bg: #ece7f5;
   --shadow: rgba(20, 22, 28, 0.08) 0 4px 16px -4px;
 
   --sans: system-ui, "Segoe UI", Roboto, sans-serif;
@@ -46,6 +50,10 @@
   --info: #8fb8f4;
   --info-bg: rgba(122, 167, 232, 0.26);
   --info-rgb: 143, 184, 244;
+  --white-side: #e0b567;
+  --white-side-bg: rgba(224, 181, 103, 0.16);
+  --black-side: #b7a4e0;
+  --black-side-bg: rgba(183, 164, 224, 0.16);
   --shadow: rgba(0, 0, 0, 0.4) 0 4px 16px -4px;
   color-scheme: dark;
 }

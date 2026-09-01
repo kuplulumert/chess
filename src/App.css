@@ -537,6 +537,24 @@ button + .segmented-active {
   line-height: 1.6;
 }
 
+.strategy-card-white {
+  background: var(--white-side-bg);
+  border-left: 4px solid var(--white-side);
+}
+
+.strategy-card-white .moves-title {
+  color: var(--white-side);
+}
+
+.strategy-card-black {
+  background: var(--black-side-bg);
+  border-left: 4px solid var(--black-side);
+}
+
+.strategy-card-black .moves-title {
+  color: var(--black-side);
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 1100px) {
