@@ -32,16 +32,22 @@ jobs:
 
       - run: npm run build
 
-      # Without this the repository keeps its legacy "deploy from a branch"
-      # source, whose builder publishes the unbuilt repository root and races
-      # this workflow on every push. configure-pages only creates a missing
-      # site, it won't convert an existing one, so switch it explicitly.
-      - name: Make GitHub Actions the Pages source
+      # On the legacy "deploy from a branch" source, GitHub's own builder
+      # publishes the unbuilt repository root and races this workflow on every
+      # push. Switching the source needs repo admin rights, which GITHUB_TOKEN
+      # does not have, so try and then say plainly what a human has to click.
+      - name: Check the Pages source
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          build_type=$(gh api "repos/${{ github.repository }}/pages" --jq .build_type || echo unknown)
+          echo "Pages build_type: $build_type"
+          if [ "$build_type" = workflow ]; then
+            exit 0
+          fi
           gh api -X PUT "repos/${{ github.repository }}/pages" -f build_type=workflow \
-            || echo "::warning::Could not switch the Pages source automatically. Set Settings -> Pages -> Source to 'GitHub Actions'."
+            && echo "Switched the Pages source to GitHub Actions." \
+            || echo "::warning::Pages source is '$build_type', not 'workflow', so GitHub's branch builder will keep overwriting this deployment with the unbuilt sources. Set Settings -> Pages -> Source to 'GitHub Actions'."
 
       - uses: actions/configure-pages@v5
         with:
