@@ -130,6 +130,7 @@ export function useOpeningTrainer(line: OpeningLine, playerColor: PlayerColor, m
     revealedHint,
     nextMoveSan: isDone ? null : line.moves[moveIndex],
     currentComment: isDone ? null : line.comments[moveIndex],
+    currentStrategy: isDone ? null : line.strategy[moveIndex],
     totalMoves: line.moves.length,
     attemptMove,
     requestHint: () => setHintRequested(true),

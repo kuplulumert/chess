@@ -45,6 +45,7 @@ function App() {
       ...line,
       moves: [...line.moves, ...line.extension.moves],
       comments: [...line.comments, ...line.extension.comments],
+      strategy: [...line.strategy, ...line.extension.strategy],
     };
   }, [line, extended]);
 
@@ -127,6 +128,7 @@ function App() {
         wrongAttempts={trainer.wrongAttempts}
         revealedHint={trainer.revealedHint}
         currentComment={trainer.currentComment}
+        currentStrategy={trainer.currentStrategy}
         isPlayerTurn={trainer.isPlayerTurn}
         canExtend={Boolean(line.extension) && !extended}
         t={t}

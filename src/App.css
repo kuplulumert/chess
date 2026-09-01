@@ -478,6 +478,14 @@ button + .segmented-active {
   word-break: break-word;
 }
 
+/* ---------- Strategy panel ---------- */
+
+.strategy-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 1100px) {

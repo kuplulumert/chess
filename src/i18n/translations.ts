@@ -18,6 +18,7 @@ export interface Dictionary {
   hintButton: string;
 
   moveHintTitle: string;
+  strategyTitle: string;
 
   progressLabel: (current: number, total: number) => string;
   lineComplete: (mode: "quiz" | "study") => string;
@@ -60,6 +61,7 @@ const en: Dictionary = {
   hintButton: "? Hint",
 
   moveHintTitle: "Move Hint",
+  strategyTitle: "Strategy",
 
   progressLabel: (current, total) => `Move ${current} of ${total}`,
   lineComplete: (mode) => (mode === "quiz" ? "✓ Line complete — nice work!" : "✓ Line complete."),
@@ -103,6 +105,7 @@ const tr: Dictionary = {
   hintButton: "? İpucu",
 
   moveHintTitle: "Hamle İpucu",
+  strategyTitle: "Strateji",
 
   progressLabel: (current, total) => `Hamle: ${current} / ${total}`,
   lineComplete: (mode) => (mode === "quiz" ? "✓ Açılış tamamlandı — aferin!" : "✓ Açılış tamamlandı."),

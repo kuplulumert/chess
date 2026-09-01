@@ -2,6 +2,7 @@ import type { OpeningLine } from "../data/openings";
 import type { MoveFeedback, PlayerColor, TrainerMode } from "../hooks/useOpeningTrainer";
 import type { Dictionary } from "../i18n/translations";
 import { MovePurpose } from "./MovePurpose";
+import { StrategyPanel } from "./StrategyPanel";
 
 interface InfoPanelProps {
   line: OpeningLine;
@@ -15,6 +16,7 @@ interface InfoPanelProps {
   wrongAttempts: number;
   revealedHint: string | null;
   currentComment: string | null;
+  currentStrategy: string | null;
   isPlayerTurn: boolean;
   canExtend: boolean;
   t: Dictionary;
@@ -49,6 +51,7 @@ export function InfoPanel({
   wrongAttempts,
   revealedHint,
   currentComment,
+  currentStrategy,
   isPlayerTurn,
   canExtend,
   t,
@@ -180,6 +183,8 @@ export function InfoPanel({
         <h3 className="moves-title">{t.movesHeading}</h3>
         <p className="moves-list">{history.length ? formatHistory(history) : t.emptyMoves}</p>
       </div>
+
+      <StrategyPanel strategy={currentStrategy} title={t.strategyTitle} />
     </aside>
   );
 }

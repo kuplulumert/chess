@@ -14,9 +14,14 @@ export function getLocalizedOpenings(language: Language): OpeningLine[] {
       name: tr.name,
       description: tr.description,
       comments: tr.comments,
+      strategy: tr.strategy,
       extension:
-        line.extension && tr.extensionComments
-          ? { moves: line.extension.moves, comments: tr.extensionComments }
+        line.extension && tr.extensionComments && tr.extensionStrategy
+          ? {
+              moves: line.extension.moves,
+              comments: tr.extensionComments,
+              strategy: tr.extensionStrategy,
+            }
           : line.extension,
     };
   });
