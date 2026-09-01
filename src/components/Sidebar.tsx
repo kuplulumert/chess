@@ -4,7 +4,9 @@ import { groupByFamily } from "../data/families";
 import type { LineProgress } from "../utils/storage";
 import type { PlayerColor } from "../hooks/useOpeningTrainer";
 import type { Theme } from "../hooks/useTheme";
+import type { Dictionary, Language } from "../i18n/translations";
 import { ThemeToggle } from "./ThemeToggle";
+import { LanguageToggle } from "./LanguageToggle";
 
 interface SidebarProps {
   lines: OpeningLine[];
@@ -14,6 +16,9 @@ interface SidebarProps {
   progress: Record<string, LineProgress>;
   theme: Theme;
   onToggleTheme: () => void;
+  language: Language;
+  onToggleLanguage: () => void;
+  t: Dictionary;
 }
 
 export function Sidebar({
@@ -24,6 +29,9 @@ export function Sidebar({
   progress,
   theme,
   onToggleTheme,
+  language,
+  onToggleLanguage,
+  t,
 }: SidebarProps) {
   const [query, setQuery] = useState("");
 
@@ -44,18 +52,25 @@ export function Sidebar({
     <aside className="sidebar">
       <div className="sidebar-header">
         <div className="sidebar-header-row">
-          <h1>Opening Trainer</h1>
-          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+          <h1>{t.appTitle}</h1>
+          <div className="sidebar-header-toggles">
+            <LanguageToggle language={language} label={t.switchToLanguage} onToggle={onToggleLanguage} />
+            <ThemeToggle
+              theme={theme}
+              label={theme === "dark" ? t.switchToLight : t.switchToDark}
+              onToggle={onToggleTheme}
+            />
+          </div>
         </div>
-        <p className="sidebar-subtitle">Drill chess openings until they're automatic.</p>
+        <p className="sidebar-subtitle">{t.appSubtitle}</p>
       </div>
       <input
         className="search-input"
         type="search"
-        placeholder="Search openings…"
+        placeholder={t.searchPlaceholder}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        aria-label="Search openings"
+        aria-label={t.searchAriaLabel}
       />
       <nav className="opening-list">
         {groups.map((group) => (
@@ -77,7 +92,7 @@ export function Sidebar({
                       <span className="opening-eco">{line.eco}</span>
                       <span className="opening-name">{line.name}</span>
                       {mastered && (
-                        <span className="opening-mastered" title="Completed as this color">
+                        <span className="opening-mastered" title={t.masteredTooltip}>
                           ✓
                         </span>
                       )}
@@ -88,7 +103,7 @@ export function Sidebar({
             </ul>
           </div>
         ))}
-        {groups.length === 0 && <p className="empty-state">No openings match “{query}”.</p>}
+        {groups.length === 0 && <p className="empty-state">{t.noOpeningsMatch(query)}</p>}
       </nav>
     </aside>
   );

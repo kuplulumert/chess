@@ -7,9 +7,10 @@ interface MovePurposeProps {
   moveIndex: number;
   /** True while the trainee is the one expected to make the next move (quiz mode, their turn). */
   awaitingMove: boolean;
+  title: string;
 }
 
-export function MovePurpose({ comment, moveIndex, awaitingMove }: MovePurposeProps) {
+export function MovePurpose({ comment, moveIndex, awaitingMove, title }: MovePurposeProps) {
   const [flashing, setFlashing] = useState(false);
   const prevIndexRef = useRef(moveIndex);
 
@@ -37,7 +38,7 @@ export function MovePurpose({ comment, moveIndex, awaitingMove }: MovePurposePro
 
   return (
     <div className={className}>
-      <h3 className="moves-title">Move Hint</h3>
+      <h3 className="moves-title">{title}</h3>
       <p className="move-purpose-text">{comment}</p>
     </div>
   );

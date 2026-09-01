@@ -1,5 +1,6 @@
 import type { OpeningLine } from "../data/openings";
 import type { MoveFeedback, PlayerColor, TrainerMode } from "../hooks/useOpeningTrainer";
+import type { Dictionary } from "../i18n/translations";
 import { MovePurpose } from "./MovePurpose";
 
 interface InfoPanelProps {
@@ -15,6 +16,7 @@ interface InfoPanelProps {
   revealedHint: string | null;
   currentComment: string | null;
   isPlayerTurn: boolean;
+  t: Dictionary;
   onColorChange: (color: PlayerColor) => void;
   onModeChange: (mode: TrainerMode) => void;
   onRestart: () => void;
@@ -46,6 +48,7 @@ export function InfoPanel({
   revealedHint,
   currentComment,
   isPlayerTurn,
+  t,
   onColorChange,
   onModeChange,
   onRestart,
@@ -53,6 +56,7 @@ export function InfoPanel({
   onNextLine,
 }: InfoPanelProps) {
   const progressPercent = totalMoves === 0 ? 0 : Math.round((moveIndex / totalMoves) * 100);
+  const colorLabel = playerColor === "w" ? t.white : t.black;
 
   return (
     <aside className="info-panel">
@@ -66,46 +70,46 @@ export function InfoPanel({
 
       <div className="info-card">
         <div className="control-row">
-          <span className="control-label">Play as</span>
+          <span className="control-label">{t.playAs}</span>
           <div className="segmented">
             <button
               type="button"
               className={playerColor === "w" ? "segmented-active" : ""}
               onClick={() => onColorChange("w")}
             >
-              White
+              {t.white}
             </button>
             <button
               type="button"
               className={playerColor === "b" ? "segmented-active" : ""}
               onClick={() => onColorChange("b")}
             >
-              Black
+              {t.black}
             </button>
           </div>
         </div>
         <div className="control-row">
-          <span className="control-label">Mode</span>
+          <span className="control-label">{t.mode}</span>
           <div className="segmented">
             <button
               type="button"
               className={mode === "quiz" ? "segmented-active" : ""}
               onClick={() => onModeChange("quiz")}
             >
-              Quiz
+              {t.quiz}
             </button>
             <button
               type="button"
               className={mode === "study" ? "segmented-active" : ""}
               onClick={() => onModeChange("study")}
             >
-              Study
+              {t.study}
             </button>
           </div>
         </div>
         <div className="button-row">
           <button type="button" className="secondary-button" onClick={onRestart}>
-            ↺ Restart
+            {t.restart}
           </button>
           <button
             type="button"
@@ -113,61 +117,56 @@ export function InfoPanel({
             onClick={onHint}
             disabled={mode !== "quiz" || isDone}
           >
-            ? Hint
+            {t.hintButton}
           </button>
         </div>
       </div>
 
-      <MovePurpose comment={currentComment} moveIndex={moveIndex} awaitingMove={isPlayerTurn} />
+      <MovePurpose
+        comment={currentComment}
+        moveIndex={moveIndex}
+        awaitingMove={isPlayerTurn}
+        title={t.moveHintTitle}
+      />
 
       <div className="info-card status-card">
         <div className="progress-track" aria-hidden="true">
           <div className="progress-fill" style={{ width: `${progressPercent}%` }} />
         </div>
-        <p className="progress-label">
-          Move {Math.min(moveIndex, totalMoves)} of {totalMoves}
-        </p>
+        <p className="progress-label">{t.progressLabel(Math.min(moveIndex, totalMoves), totalMoves)}</p>
 
         {isDone ? (
           <>
-            <p className="status-line status-done">
-              ✓ Line complete{mode === "quiz" ? " — nice work!" : "."}
-            </p>
+            <p className="status-line status-done">{t.lineComplete(mode)}</p>
             <div className="button-row">
               <button type="button" className="secondary-button" onClick={onRestart}>
-                Play again
+                {t.playAgain}
               </button>
               <button type="button" className="secondary-button" onClick={onNextLine}>
-                Next opening →
+                {t.nextOpening}
               </button>
             </div>
           </>
         ) : mode === "study" ? (
-          <p className="status-line">Replaying the line — watch and follow along.</p>
+          <p className="status-line">{t.replayingLine}</p>
         ) : (
           <>
-            <p className="status-line">
-              {feedback === "wrong"
-                ? "Not quite — try again."
-                : `Your move (${playerColor === "w" ? "White" : "Black"})…`}
-            </p>
+            <p className="status-line">{feedback === "wrong" ? t.notQuite : t.yourMove(colorLabel)}</p>
             {revealedHint && (
               <p className="hint-line">
-                Hint: play <strong>{revealedHint}</strong>
+                {t.hintLabel} <strong>{revealedHint}</strong>
               </p>
             )}
             {wrongAttempts > 0 && !revealedHint && (
-              <p className="hint-line hint-line-muted">
-                {wrongAttempts} wrong attempt{wrongAttempts > 1 ? "s" : ""} — keep trying.
-              </p>
+              <p className="hint-line hint-line-muted">{t.wrongAttempts(wrongAttempts)}</p>
             )}
           </>
         )}
       </div>
 
       <div className="info-card">
-        <h3 className="moves-title">Moves</h3>
-        <p className="moves-list">{history.length ? formatHistory(history) : "—"}</p>
+        <h3 className="moves-title">{t.movesHeading}</h3>
+        <p className="moves-list">{history.length ? formatHistory(history) : t.emptyMoves}</p>
       </div>
     </aside>
   );

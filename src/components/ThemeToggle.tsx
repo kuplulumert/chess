@@ -2,19 +2,18 @@ import type { Theme } from "../hooks/useTheme";
 
 interface ThemeToggleProps {
   theme: Theme;
+  label: string;
   onToggle: () => void;
 }
 
-export function ThemeToggle({ theme, onToggle }: ThemeToggleProps) {
-  const nextTheme = theme === "dark" ? "light" : "dark";
-
+export function ThemeToggle({ theme, label, onToggle }: ThemeToggleProps) {
   return (
     <button
       type="button"
       className="theme-toggle"
       onClick={onToggle}
-      aria-label={`Switch to ${nextTheme} mode`}
-      title={`Switch to ${nextTheme} mode`}
+      aria-label={label}
+      title={label}
     >
       {theme === "dark" ? (
         <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">

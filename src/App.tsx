@@ -1,21 +1,25 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Square } from "chess.js";
-import { openings, type OpeningLine } from "./data/openings";
+import { openings as openingsEn, type OpeningLine } from "./data/openings";
+import { getLocalizedOpenings } from "./data/localize";
 import { Sidebar } from "./components/Sidebar";
 import { BoardPanel } from "./components/BoardPanel";
 import { InfoPanel } from "./components/InfoPanel";
 import { getAllProgress, recordCompletion } from "./utils/storage";
 import { useOpeningTrainer, type PlayerColor, type TrainerMode } from "./hooks/useOpeningTrainer";
 import { useTheme } from "./hooks/useTheme";
+import { useLanguage } from "./hooks/useLanguage";
 import "./App.css";
 
 function App() {
-  const [selectedId, setSelectedId] = useState(openings[0].id);
+  const [selectedId, setSelectedId] = useState(openingsEn[0].id);
   const [playerColor, setPlayerColor] = useState<PlayerColor>("w");
   const [mode, setMode] = useState<TrainerMode>("quiz");
   const [progress, setProgress] = useState(() => getAllProgress());
   const { theme, toggleTheme } = useTheme();
+  const { language, t, toggleLanguage } = useLanguage();
 
+  const openings = useMemo(() => getLocalizedOpenings(language), [language]);
   const line = openings.find((o) => o.id === selectedId) ?? openings[0];
   const trainer = useOpeningTrainer(line, playerColor, mode);
 
@@ -47,7 +51,7 @@ function App() {
   const handleNextLine = useCallback(() => {
     const index = openings.findIndex((o) => o.id === selectedId);
     setSelectedId(openings[(index + 1) % openings.length].id);
-  }, [selectedId]);
+  }, [openings, selectedId]);
 
   return (
     <div className="app-shell">
@@ -59,6 +63,9 @@ function App() {
         progress={progress}
         theme={theme}
         onToggleTheme={toggleTheme}
+        language={language}
+        onToggleLanguage={toggleLanguage}
+        t={t}
       />
       <main className="board-column">
         <BoardPanel
@@ -84,6 +91,7 @@ function App() {
         revealedHint={trainer.revealedHint}
         currentComment={trainer.currentComment}
         isPlayerTurn={trainer.isPlayerTurn}
+        t={t}
         onColorChange={setPlayerColor}
         onModeChange={setMode}
         onRestart={trainer.reset}
