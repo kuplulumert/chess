@@ -196,12 +196,18 @@
 }
 
 .move-purpose {
-  background: var(--panel-bg);
+  background: var(--info-bg);
+  border-left: 3px solid var(--info);
   transition: background-color 600ms ease;
+}
+
+.move-purpose .moves-title {
+  color: var(--info);
 }
 
 .move-purpose-flash {
   background: var(--accent-bg);
+  border-left-color: var(--accent);
   transition: none;
 }
 
