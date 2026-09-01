@@ -61,7 +61,7 @@ const en: Dictionary = {
   hintButton: "? Hint",
 
   moveHintTitle: "Move Hint",
-  strategyTitle: "Strategy",
+  strategyTitle: "Why We Played This",
 
   progressLabel: (current, total) => `Move ${current} of ${total}`,
   lineComplete: (mode) => (mode === "quiz" ? "✓ Line complete — nice work!" : "✓ Line complete."),
@@ -105,7 +105,7 @@ const tr: Dictionary = {
   hintButton: "? İpucu",
 
   moveHintTitle: "Hamle İpucu",
-  strategyTitle: "Strateji",
+  strategyTitle: "Neden Bunu Oynadık",
 
   progressLabel: (current, total) => `Hamle: ${current} / ${total}`,
   lineComplete: (mode) => (mode === "quiz" ? "✓ Açılış tamamlandı — aferin!" : "✓ Açılış tamamlandı."),

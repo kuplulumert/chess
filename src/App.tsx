@@ -128,7 +128,7 @@ function App() {
         wrongAttempts={trainer.wrongAttempts}
         revealedHint={trainer.revealedHint}
         currentComment={trainer.currentComment}
-        currentStrategy={trainer.currentStrategy}
+        playedStrategy={trainer.playedStrategy}
         isPlayerTurn={trainer.isPlayerTurn}
         canExtend={Boolean(line.extension) && !extended}
         t={t}

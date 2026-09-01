@@ -311,10 +311,6 @@
   transform: translateY(0);
 }
 
-.info-strategy {
-  margin-top: 10px;
-}
-
 .move-purpose {
   background: var(--info-bg);
   border-left: 4px solid var(--info);
