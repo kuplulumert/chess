@@ -83,6 +83,7 @@ function App() {
         wrongAttempts={trainer.wrongAttempts}
         revealedHint={trainer.revealedHint}
         currentComment={trainer.currentComment}
+        isPlayerTurn={trainer.isPlayerTurn}
         onColorChange={setPlayerColor}
         onModeChange={setMode}
         onRestart={trainer.reset}

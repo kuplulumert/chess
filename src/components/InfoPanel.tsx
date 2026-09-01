@@ -14,6 +14,7 @@ interface InfoPanelProps {
   wrongAttempts: number;
   revealedHint: string | null;
   currentComment: string | null;
+  isPlayerTurn: boolean;
   onColorChange: (color: PlayerColor) => void;
   onModeChange: (mode: TrainerMode) => void;
   onRestart: () => void;
@@ -44,6 +45,7 @@ export function InfoPanel({
   wrongAttempts,
   revealedHint,
   currentComment,
+  isPlayerTurn,
   onColorChange,
   onModeChange,
   onRestart,
@@ -116,7 +118,7 @@ export function InfoPanel({
         </div>
       </div>
 
-      <MovePurpose comment={currentComment} moveIndex={moveIndex} />
+      <MovePurpose comment={currentComment} moveIndex={moveIndex} awaitingMove={isPlayerTurn} />
 
       <div className="info-card status-card">
         <div className="progress-track" aria-hidden="true">

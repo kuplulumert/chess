@@ -5,9 +5,11 @@ const FLASH_DURATION_MS = 550;
 interface MovePurposeProps {
   comment: string | null;
   moveIndex: number;
+  /** True while the trainee is the one expected to make the next move (quiz mode, their turn). */
+  awaitingMove: boolean;
 }
 
-export function MovePurpose({ comment, moveIndex }: MovePurposeProps) {
+export function MovePurpose({ comment, moveIndex, awaitingMove }: MovePurposeProps) {
   const [flashing, setFlashing] = useState(false);
   const prevIndexRef = useRef(moveIndex);
 
@@ -28,8 +30,13 @@ export function MovePurpose({ comment, moveIndex }: MovePurposeProps) {
 
   if (!comment) return null;
 
+  const className =
+    "info-card move-purpose" +
+    (flashing ? " move-purpose-flash" : "") +
+    (awaitingMove && !flashing ? " move-purpose-attention" : "");
+
   return (
-    <div className={"info-card move-purpose" + (flashing ? " move-purpose-flash" : "")}>
+    <div className={className}>
       <h3 className="moves-title">Why this move</h3>
       <p className="move-purpose-text">{comment}</p>
     </div>
