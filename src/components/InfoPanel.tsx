@@ -2,7 +2,6 @@ import type { OpeningLine } from "../data/openings";
 import type { MoveFeedback, PlayerColor, TrainerMode } from "../hooks/useOpeningTrainer";
 import type { Dictionary } from "../i18n/translations";
 import { MovePurpose } from "./MovePurpose";
-import { StrategyPanel } from "./StrategyPanel";
 
 interface InfoPanelProps {
   line: OpeningLine;
@@ -68,11 +67,19 @@ export function InfoPanel({
   return (
     <aside className="info-panel">
       <div className="info-card">
-        <h2>{line.name}</h2>
+        <div className="opening-name-wrap" tabIndex={0}>
+          <h2>{line.name}</h2>
+          <div className="opening-description-tooltip">{line.description}</div>
+        </div>
         <p className="info-eco">
           {line.eco} · {line.family}
         </p>
-        <p className="info-description">{line.description}</p>
+        {currentStrategy && (
+          <div className="info-strategy">
+            <h3 className="moves-title">{t.strategyTitle}</h3>
+            <p className="strategy-text">{currentStrategy}</p>
+          </div>
+        )}
       </div>
 
       <div className="info-card">
@@ -183,8 +190,6 @@ export function InfoPanel({
         <h3 className="moves-title">{t.movesHeading}</h3>
         <p className="moves-list">{history.length ? formatHistory(history) : t.emptyMoves}</p>
       </div>
-
-      <StrategyPanel strategy={currentStrategy} title={t.strategyTitle} />
     </aside>
   );
 }

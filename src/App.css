@@ -267,11 +267,52 @@
   margin-top: 4px;
 }
 
-.info-description {
-  font-size: 13px;
+.opening-name-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.opening-name-wrap h2 {
+  cursor: help;
+  border-bottom: 1px dashed var(--text-muted);
+  width: fit-content;
+}
+
+.opening-description-tooltip {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  width: max-content;
+  max-width: 260px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
   color: var(--text);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease,
+    visibility 150ms;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.opening-name-wrap:hover .opening-description-tooltip,
+.opening-name-wrap:focus-visible .opening-description-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.info-strategy {
   margin-top: 10px;
-  line-height: 1.55;
 }
 
 .move-purpose {
@@ -478,7 +519,7 @@ button + .segmented-active {
   word-break: break-word;
 }
 
-/* ---------- Strategy panel ---------- */
+/* ---------- Strategy text ---------- */
 
 .strategy-text {
   font-size: 13px;
