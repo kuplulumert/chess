@@ -1,5 +1,7 @@
 # Opening Trainer
 
+**Live: https://kuplulumert.github.io/chess/**
+
 A focused chess app for one thing only: memorizing openings. Pick a line, choose a
 colour, and play the book moves from memory — the app plays the opponent's replies
 and tells you when you've gone off book.
