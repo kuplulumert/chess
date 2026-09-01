@@ -15,7 +15,7 @@ import "./App.css";
 function App() {
   const [selectedId, setSelectedId] = useState(openingsEn[0].id);
   const [playerColor, setPlayerColor] = useState<PlayerColor>("w");
-  const [mode, setMode] = useState<TrainerMode>("quiz");
+  const [mode, setMode] = useState<TrainerMode>("study");
   const [progress, setProgress] = useState(() => getAllProgress());
   const [extended, setExtended] = useState(false);
   const { theme, toggleTheme } = useTheme();

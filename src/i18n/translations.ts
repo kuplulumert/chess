@@ -54,7 +54,7 @@ const en: Dictionary = {
   white: "White",
   black: "Black",
   mode: "Mode",
-  quiz: "Quiz",
+  quiz: "Practice",
   study: "Study",
   restart: "↺ Restart",
   hintButton: "? Hint",
@@ -78,7 +78,7 @@ const en: Dictionary = {
   switchToLanguage: "Türkçeye geç",
 
   howToUse:
-    "Pick a line on the left, then choose White or Black — you can drill the same opening from either side. Play the moves yourself in Quiz mode, or watch them play out in Study mode.",
+    "Pick a line on the left, then choose White or Black — you can drill the same opening from either side. You always play the moves yourself: Study mode shows where to move, Practice mode makes you find it first.",
   dismissGuide: "Dismiss",
 
   extendPrompt: "Want to go deeper into this line?",
@@ -97,7 +97,7 @@ const tr: Dictionary = {
   white: "Beyaz",
   black: "Siyah",
   mode: "Mod",
-  quiz: "Quiz",
+  quiz: "Pratik",
   study: "Çalışma",
   restart: "↺ Baştan başla",
   hintButton: "? İpucu",
@@ -121,7 +121,7 @@ const tr: Dictionary = {
   switchToLanguage: "Switch to English",
 
   howToUse:
-    "Soldan bir açılış seç, sonra Beyaz ya da Siyah tarafı seç — aynı açılışı iki taraftan da çalışabilirsin. Hamleleri Quiz modunda kendin oyna, ya da Çalışma modunda nasıl oynandığını izle.",
+    "Soldan bir açılış seç, sonra Beyaz ya da Siyah tarafı seç — aynı açılışı iki taraftan da çalışabilirsin. Hamleleri her zaman sen oynarsın: Çalışma modunda nereye oynayacağın gösterilir, Pratik modunda önce kendin bulmaya çalışırsın.",
   dismissGuide: "Kapat",
 
   extendPrompt: "Bu açılışta biraz daha derine inmek ister misin?",
