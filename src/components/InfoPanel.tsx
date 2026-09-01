@@ -15,7 +15,8 @@ interface InfoPanelProps {
   wrongAttempts: number;
   revealedHint: string | null;
   currentComment: string | null;
-  playedStrategy: string | null;
+  whiteStrategy: string | null;
+  blackStrategy: string | null;
   isPlayerTurn: boolean;
   canExtend: boolean;
   t: Dictionary;
@@ -50,7 +51,8 @@ export function InfoPanel({
   wrongAttempts,
   revealedHint,
   currentComment,
-  playedStrategy,
+  whiteStrategy,
+  blackStrategy,
   isPlayerTurn,
   canExtend,
   t,
@@ -137,10 +139,17 @@ export function InfoPanel({
         title={t.moveHintTitle}
       />
 
-      {playedStrategy && (
+      {whiteStrategy && (
         <div className="info-card">
-          <h3 className="moves-title">{t.strategyTitle}</h3>
-          <p className="strategy-text">{playedStrategy}</p>
+          <h3 className="moves-title">{t.white}</h3>
+          <p className="strategy-text">{whiteStrategy}</p>
+        </div>
+      )}
+
+      {blackStrategy && (
+        <div className="info-card">
+          <h3 className="moves-title">{t.black}</h3>
+          <p className="strategy-text">{blackStrategy}</p>
         </div>
       )}
 

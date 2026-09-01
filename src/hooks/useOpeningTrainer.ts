@@ -13,6 +13,19 @@ function moveColor(plyIndex: number): PlayerColor {
   return plyIndex % 2 === 0 ? "w" : "b";
 }
 
+// Colors strictly alternate by ply, so a color's most recent played move is
+// either the last played ply itself, or the one right before it.
+function lastStrategyForColor(
+  strategy: string[],
+  moveIndex: number,
+  color: PlayerColor,
+): string | null {
+  const lastPly = moveIndex - 1;
+  if (lastPly < 0) return null;
+  const targetPly = moveColor(lastPly) === color ? lastPly : lastPly - 1;
+  return targetPly >= 0 ? strategy[targetPly] : null;
+}
+
 export function useOpeningTrainer(line: OpeningLine, playerColor: PlayerColor, mode: TrainerMode) {
   const [game, setGame] = useState(() => new Chess());
   const [moveIndex, setMoveIndex] = useState(0);
@@ -130,7 +143,8 @@ export function useOpeningTrainer(line: OpeningLine, playerColor: PlayerColor, m
     revealedHint,
     nextMoveSan: isDone ? null : line.moves[moveIndex],
     currentComment: isDone ? null : line.comments[moveIndex],
-    playedStrategy: moveIndex > 0 ? line.strategy[moveIndex - 1] : null,
+    whiteStrategy: lastStrategyForColor(line.strategy, moveIndex, "w"),
+    blackStrategy: lastStrategyForColor(line.strategy, moveIndex, "b"),
     totalMoves: line.moves.length,
     attemptMove,
     requestHint: () => setHintRequested(true),
