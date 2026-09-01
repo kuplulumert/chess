@@ -3,6 +3,7 @@ import type { Square } from "chess.js";
 import { openings as openingsEn, type OpeningLine } from "./data/openings";
 import { getLocalizedOpenings } from "./data/localize";
 import { Sidebar } from "./components/Sidebar";
+import { HowToUseBanner } from "./components/HowToUseBanner";
 import { BoardPanel } from "./components/BoardPanel";
 import { InfoPanel } from "./components/InfoPanel";
 import { getAllProgress, recordCompletion } from "./utils/storage";
@@ -55,6 +56,7 @@ function App() {
 
   return (
     <div className="app-shell">
+      <HowToUseBanner text={t.howToUse} dismissLabel={t.dismissGuide} />
       <Sidebar
         lines={openings}
         selectedId={selectedId}

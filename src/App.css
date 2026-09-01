@@ -7,6 +7,45 @@
   align-items: start;
 }
 
+/* ---------- How-to-use banner ---------- */
+
+.how-to-use {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--info-bg);
+  border: 1px solid var(--info);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.how-to-use-text {
+  font-size: 13px;
+  color: var(--text-h);
+  line-height: 1.5;
+}
+
+.how-to-use-dismiss {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--info);
+  font-size: 18px;
+  line-height: 1;
+  border-radius: 6px;
+}
+
+.how-to-use-dismiss:hover {
+  background: rgba(var(--info-rgb), 0.18);
+}
+
 /* ---------- Sidebar ---------- */
 
 .sidebar {
@@ -440,5 +479,9 @@
 
   .board-column {
     order: -1;
+  }
+
+  .how-to-use {
+    order: -2;
   }
 }

@@ -34,6 +34,9 @@ export interface Dictionary {
   switchToLight: string;
   switchToDark: string;
   switchToLanguage: string;
+
+  howToUse: string;
+  dismissGuide: string;
 }
 
 const en: Dictionary = {
@@ -70,6 +73,10 @@ const en: Dictionary = {
   switchToLight: "Switch to light mode",
   switchToDark: "Switch to dark mode",
   switchToLanguage: "Türkçeye geç",
+
+  howToUse:
+    "Pick a line on the left, then choose White or Black — you can drill the same opening from either side. Play the moves yourself in Quiz mode, or watch them play out in Study mode.",
+  dismissGuide: "Dismiss",
 };
 
 const tr: Dictionary = {
@@ -106,6 +113,10 @@ const tr: Dictionary = {
   switchToLight: "Açık temaya geç",
   switchToDark: "Koyu temaya geç",
   switchToLanguage: "Switch to English",
+
+  howToUse:
+    "Soldan bir açılış seç, sonra Beyaz ya da Siyah tarafı seç — aynı açılışı iki taraftan da çalışabilirsin. Hamleleri Quiz modunda kendin oyna, ya da Çalışma modunda nasıl oynandığını izle.",
+  dismissGuide: "Kapat",
 };
 
 export const dictionaries: Record<Language, Dictionary> = { en, tr };
