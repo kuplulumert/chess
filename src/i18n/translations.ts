@@ -1,5 +1,24 @@
 export type Language = "en" | "tr";
 
+export interface FinderQuestionCopy {
+  title: string;
+  options: Record<string, string>;
+}
+
+export interface FinderCopy {
+  title: string;
+  trigger: string;
+  intro: string;
+  step: (current: number, total: number) => string;
+  questions: Record<"color" | "firstMove" | "risk" | "approach" | "theory", FinderQuestionCopy>;
+  back: string;
+  restart: string;
+  resultsSubtitle: string;
+  noMatch: string;
+  studyThis: string;
+  close: string;
+}
+
 export interface Dictionary {
   appTitle: string;
   appSubtitle: string;
@@ -40,6 +59,8 @@ export interface Dictionary {
 
   extendPrompt: string;
   extendButton: string;
+
+  finder: FinderCopy;
 }
 
 const en: Dictionary = {
@@ -83,6 +104,55 @@ const en: Dictionary = {
 
   extendPrompt: "Want to go deeper into this line?",
   extendButton: "+5 more moves",
+
+  finder: {
+    title: "Find My Opening",
+    trigger: "🧭 Find my opening",
+    intro: "Answer a few quick questions and we'll point you to an opening that fits your style.",
+    step: (current, total) => `Question ${current} of ${total}`,
+    questions: {
+      color: {
+        title: "Which side do you want an opening for?",
+        options: { white: "White", black: "Black", any: "Either — surprise me" },
+      },
+      firstMove: {
+        title: "Which kind of positions pull you in?",
+        options: {
+          e4: "Open, e4-style fights",
+          d4: "Closed, d4-style structures",
+          flank: "Flexible flank systems",
+          any: "No preference",
+        },
+      },
+      risk: {
+        title: "How much risk do you like to take?",
+        options: { low: "Safe and solid", medium: "Balanced", high: "Sharp and aggressive", any: "No preference" },
+      },
+      approach: {
+        title: "How do you like to fight for the center?",
+        options: {
+          classical: "Occupy it with pawns right away",
+          hypermodern: "Control it from a distance, then strike",
+          any: "No preference",
+        },
+      },
+      theory: {
+        title: "How much theory are you up for memorizing?",
+        options: {
+          low: "As little as possible",
+          medium: "A moderate amount",
+          high: "I'm ready to go deep",
+          any: "No preference",
+        },
+      },
+    },
+    back: "← Back",
+    restart: "Start over",
+    resultsSubtitle: "Based on your answers, these fit best:",
+    noMatch: "No strong match — try starting over with different answers.",
+    studyThis: "Study this",
+    close: "Close",
+  },
 };
 
 const tr: Dictionary = {
@@ -126,6 +196,55 @@ const tr: Dictionary = {
 
   extendPrompt: "Bu açılışta biraz daha derine inmek ister misin?",
   extendButton: "+5 hamle daha",
+
+  finder: {
+    title: "Açılış Bul",
+    trigger: "🧭 Bana açılış öner",
+    intro: "Birkaç soruyu cevapla, tarzına uyan bir açılış önerelim.",
+    step: (current, total) => `Soru ${current} / ${total}`,
+    questions: {
+      color: {
+        title: "Hangi taraf için açılış arıyorsun?",
+        options: { white: "Beyaz", black: "Siyah", any: "Farketmez, sen seç" },
+      },
+      firstMove: {
+        title: "Hangi tarz pozisyonlar seni daha çok çekiyor?",
+        options: {
+          e4: "1.e4 tarzı açık mücadeleler",
+          d4: "1.d4 tarzı kapalı yapılar",
+          flank: "Esnek kanat açılışları",
+          any: "Farketmez",
+        },
+      },
+      risk: {
+        title: "Ne kadar risk almayı seversin?",
+        options: { low: "Güvenli ve sağlam", medium: "Dengeli", high: "Keskin ve agresif", any: "Farketmez" },
+      },
+      approach: {
+        title: "Merkez için nasıl mücadele etmeyi seversin?",
+        options: {
+          classical: "Hemen piyonlarla işgal etmek",
+          hypermodern: "Uzaktan kontrol edip sonra vurmak",
+          any: "Farketmez",
+        },
+      },
+      theory: {
+        title: "Ne kadar teori ezberlemeye hazırsın?",
+        options: {
+          low: "Mümkün olduğunca az",
+          medium: "Orta düzeyde",
+          high: "Derinlere inmeye hazırım",
+          any: "Farketmez",
+        },
+      },
+    },
+    back: "← Geri",
+    restart: "Baştan başla",
+    resultsSubtitle: "Cevaplarına göre en uygun olanlar:",
+    noMatch: "Güçlü bir eşleşme yok — farklı cevaplarla baştan dene.",
+    studyThis: "Bunu çalış",
+    close: "Kapat",
+  },
 };
 
 export const dictionaries: Record<Language, Dictionary> = { en, tr };

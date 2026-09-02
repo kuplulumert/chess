@@ -13,6 +13,7 @@ interface SidebarProps {
   selectedId: string;
   playerColor: PlayerColor;
   onSelect: (line: OpeningLine) => void;
+  onOpenFinder: () => void;
   progress: Record<string, LineProgress>;
   theme: Theme;
   onToggleTheme: () => void;
@@ -26,6 +27,7 @@ export function Sidebar({
   selectedId,
   playerColor,
   onSelect,
+  onOpenFinder,
   progress,
   theme,
   onToggleTheme,
@@ -64,6 +66,9 @@ export function Sidebar({
         </div>
         <p className="sidebar-subtitle">{t.appSubtitle}</p>
       </div>
+      <button type="button" className="finder-trigger" onClick={onOpenFinder}>
+        {t.finder.trigger}
+      </button>
       <input
         className="search-input"
         type="search"

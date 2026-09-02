@@ -112,6 +112,22 @@
   color: var(--accent);
 }
 
+.finder-trigger {
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.finder-trigger:hover {
+  border-color: var(--accent);
+}
+
 .search-input {
   width: 100%;
   padding: 8px 10px;
@@ -553,6 +569,156 @@ button + .segmented-active {
 
 .strategy-card-black .moves-title {
   color: var(--black-side);
+}
+
+/* ---------- Opening Finder ---------- */
+
+.finder-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.finder-modal {
+  width: min(480px, 100%);
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.finder-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.finder-close {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  border-radius: 6px;
+}
+
+.finder-close:hover {
+  background: var(--accent-bg);
+  color: var(--text-h);
+}
+
+.finder-step {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-top: 16px;
+}
+
+.finder-question {
+  font-size: 18px;
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+
+.finder-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.finder-option {
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  font-size: 14px;
+}
+
+.finder-option:hover {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.finder-back {
+  margin-top: 18px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.finder-back:hover {
+  color: var(--text-h);
+  border-color: var(--accent);
+}
+
+.finder-results {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.finder-result-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.finder-result-card .secondary-button {
+  flex: 0 0 auto;
+}
+
+.finder-result-eco {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.finder-result-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin-top: 2px;
+}
+
+.finder-result-desc {
+  font-size: 12px;
+  color: var(--text);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.finder-no-match {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 12px;
 }
 
 /* ---------- Responsive ---------- */

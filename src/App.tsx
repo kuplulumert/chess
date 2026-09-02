@@ -6,6 +6,7 @@ import { Sidebar } from "./components/Sidebar";
 import { HowToUseBanner } from "./components/HowToUseBanner";
 import { BoardPanel } from "./components/BoardPanel";
 import { InfoPanel } from "./components/InfoPanel";
+import { OpeningFinder } from "./components/OpeningFinder";
 import { getAllProgress, recordCompletion } from "./utils/storage";
 import { useOpeningTrainer, type PlayerColor, type TrainerMode } from "./hooks/useOpeningTrainer";
 import { useTheme } from "./hooks/useTheme";
@@ -18,6 +19,7 @@ function App() {
   const [mode, setMode] = useState<TrainerMode>("study");
   const [progress, setProgress] = useState(() => getAllProgress());
   const [extended, setExtended] = useState(false);
+  const [finderOpen, setFinderOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { language, t, toggleLanguage } = useLanguage();
 
@@ -103,6 +105,14 @@ function App() {
     setExtended(true);
   }, []);
 
+  const handleFinderSelect = useCallback(
+    (next: OpeningLine) => {
+      selectOpening(next.id);
+      setFinderOpen(false);
+    },
+    [selectOpening],
+  );
+
   return (
     <div className="app-shell">
       <HowToUseBanner text={t.howToUse} dismissLabel={t.dismissGuide} />
@@ -111,6 +121,7 @@ function App() {
         selectedId={selectedId}
         playerColor={playerColor}
         onSelect={handleSelect}
+        onOpenFinder={() => setFinderOpen(true)}
         progress={progress}
         theme={theme}
         onToggleTheme={toggleTheme}
@@ -153,6 +164,16 @@ function App() {
         onNextLine={handleNextLine}
         onExtend={handleExtend}
       />
+
+      {finderOpen && (
+        <OpeningFinder
+          openings={openings}
+          canonicalOpenings={openingsEn}
+          t={t}
+          onSelect={handleFinderSelect}
+          onClose={() => setFinderOpen(false)}
+        />
+      )}
     </div>
   );
 }
