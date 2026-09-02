@@ -140,17 +140,20 @@ function App() {
         >
           {t.map.navLabel}
         </button>
+        {view === "trainer" && (
+          <HowToUseBanner
+            text={t.howToUse}
+            dismissLabel={t.dismissGuide}
+            storageKey="chess-opening-trainer-guide-dismissed"
+            variant="inline"
+          />
+        )}
       </div>
 
       {view === "map" ? (
         <SkillMap openings={openings} progress={progress} t={t} onTrainLine={handleMapSelect} />
       ) : (
         <div className="app-shell">
-          <HowToUseBanner
-            text={t.howToUse}
-            dismissLabel={t.dismissGuide}
-            storageKey="chess-opening-trainer-guide-dismissed"
-          />
           <Sidebar
             lines={openings}
             selectedId={selectedId}

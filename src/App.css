@@ -2,6 +2,8 @@
 
 .view-switcher {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 10px 20px;
   background: var(--panel-bg);
@@ -77,6 +79,33 @@
 
 .how-to-use-dismiss:hover {
   background: rgba(var(--info-rgb), 0.18);
+}
+
+/* Sits inside the view-switcher bar itself instead of opening its own
+   bordered area below it. */
+.how-to-use-inline {
+  grid-column: unset;
+  flex: 1 1 260px;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  gap: 10px;
+}
+
+.how-to-use-inline .how-to-use-text {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.how-to-use-inline .how-to-use-dismiss {
+  color: var(--text-muted);
+}
+
+.how-to-use-inline .how-to-use-dismiss:hover {
+  background: var(--accent-bg);
+  color: var(--text-h);
 }
 
 /* ---------- Sidebar ---------- */
