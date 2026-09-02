@@ -1,3 +1,36 @@
+/* ---------- View switcher (Trainer / Skill Map) ---------- */
+
+.view-switcher {
+  display: flex;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.view-switcher button {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.view-switcher button:hover {
+  border-color: var(--accent);
+}
+
+.view-switcher button.view-switcher-active {
+  background: var(--accent);
+  color: var(--panel-bg);
+  border-color: var(--accent);
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr) 320px;

@@ -19,6 +19,18 @@ export interface FinderCopy {
   close: string;
 }
 
+export interface MapCopy {
+  navLabel: string;
+  trainerNavLabel: string;
+  title: string;
+  subtitle: string;
+  rankTitles: [string, string, string, string, string];
+  pointsLabel: (points: number, total: number) => string;
+  capstoneLabel: (family: string) => string;
+  capstoneLockedHint: string;
+  lineLockedHint: string;
+}
+
 export interface Dictionary {
   appTitle: string;
   appSubtitle: string;
@@ -61,6 +73,7 @@ export interface Dictionary {
   extendButton: string;
 
   finder: FinderCopy;
+  map: MapCopy;
 }
 
 const en: Dictionary = {
@@ -153,6 +166,18 @@ const en: Dictionary = {
     studyThis: "Study this",
     close: "Close",
   },
+
+  map: {
+    navLabel: "🗺️ Skill Map",
+    trainerNavLabel: "♟️ Trainer",
+    title: "Opening Skill Map",
+    subtitle: "Every family is its own constellation — light up a line by training it, light up the whole family for its capstone perk.",
+    rankTitles: ["Novice", "Apprentice", "Skilled", "Master", "Grandmaster"],
+    pointsLabel: (points, total) => `${points} / ${total} perks unlocked`,
+    capstoneLabel: (family) => `${family} Master`,
+    capstoneLockedHint: "Unlock every line in this family to earn this perk",
+    lineLockedHint: "Not trained yet — click to start",
+  },
 };
 
 const tr: Dictionary = {
@@ -244,6 +269,18 @@ const tr: Dictionary = {
     noMatch: "Güçlü bir eşleşme yok — farklı cevaplarla baştan dene.",
     studyThis: "Bunu çalış",
     close: "Kapat",
+  },
+
+  map: {
+    navLabel: "🗺️ Yetenek Haritası",
+    trainerNavLabel: "♟️ Antrenör",
+    title: "Açılış Yetenek Haritası",
+    subtitle: "Her aile kendi takımyıldızı — bir hattı çalışarak ışığını yak, aileyi tamamlayınca kapanış perk'ini kazan.",
+    rankTitles: ["Acemi", "Çırak", "Yetenekli", "Usta", "Büyük Üstat"],
+    pointsLabel: (points, total) => `${points} / ${total} perk açıldı`,
+    capstoneLabel: (family) => `${family} Ustası`,
+    capstoneLockedHint: "Bu perk'i kazanmak için bu ailedeki tüm hatları aç",
+    lineLockedHint: "Henüz çalışılmadı — başlamak için tıkla",
   },
 };
 

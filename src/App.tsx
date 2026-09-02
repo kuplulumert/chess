@@ -7,6 +7,7 @@ import { HowToUseBanner } from "./components/HowToUseBanner";
 import { BoardPanel } from "./components/BoardPanel";
 import { InfoPanel } from "./components/InfoPanel";
 import { OpeningFinder } from "./components/OpeningFinder";
+import { SkillMap } from "./components/SkillMap";
 import { getAllProgress, recordCompletion } from "./utils/storage";
 import { useOpeningTrainer, type PlayerColor, type TrainerMode } from "./hooks/useOpeningTrainer";
 import { useTheme } from "./hooks/useTheme";
@@ -20,6 +21,7 @@ function App() {
   const [progress, setProgress] = useState(() => getAllProgress());
   const [extended, setExtended] = useState(false);
   const [finderOpen, setFinderOpen] = useState(false);
+  const [view, setView] = useState<"trainer" | "map">("trainer");
   const { theme, toggleTheme } = useTheme();
   const { language, t, toggleLanguage } = useLanguage();
 
@@ -113,68 +115,99 @@ function App() {
     [selectOpening],
   );
 
-  return (
-    <div className="app-shell">
-      <HowToUseBanner text={t.howToUse} dismissLabel={t.dismissGuide} />
-      <Sidebar
-        lines={openings}
-        selectedId={selectedId}
-        playerColor={playerColor}
-        onSelect={handleSelect}
-        onOpenFinder={() => setFinderOpen(true)}
-        progress={progress}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-        language={language}
-        onToggleLanguage={toggleLanguage}
-        t={t}
-      />
-      <main className="board-column">
-        <BoardPanel
-          fen={trainer.fen}
-          playerColor={playerColor}
-          isPlayerTurn={trainer.isPlayerTurn}
-          feedback={trainer.feedback}
-          lastWrongSquares={trainer.lastWrongSquares}
-          hintSan={trainer.revealedHint}
-          onDrop={handleDrop}
-        />
-      </main>
-      <InfoPanel
-        line={line}
-        playerColor={playerColor}
-        mode={mode}
-        history={trainer.history}
-        moveIndex={trainer.moveIndex}
-        totalMoves={trainer.totalMoves}
-        isDone={trainer.isDone}
-        feedback={trainer.feedback}
-        wrongAttempts={trainer.wrongAttempts}
-        revealedHint={trainer.revealedHint}
-        currentComment={trainer.currentComment}
-        whiteStrategy={trainer.whiteStrategy}
-        blackStrategy={trainer.blackStrategy}
-        isPlayerTurn={trainer.isPlayerTurn}
-        canExtend={Boolean(line.extension) && !extended}
-        t={t}
-        onColorChange={setPlayerColor}
-        onModeChange={setMode}
-        onRestart={handleRestart}
-        onHint={trainer.requestHint}
-        onNextLine={handleNextLine}
-        onExtend={handleExtend}
-      />
+  const handleMapSelect = useCallback(
+    (next: OpeningLine) => {
+      selectOpening(next.id);
+      setView("trainer");
+    },
+    [selectOpening],
+  );
 
-      {finderOpen && (
-        <OpeningFinder
-          openings={openings}
-          canonicalOpenings={openingsEn}
-          t={t}
-          onSelect={handleFinderSelect}
-          onClose={() => setFinderOpen(false)}
-        />
+  return (
+    <>
+      <div className="view-switcher">
+        <button
+          type="button"
+          className={view === "trainer" ? "view-switcher-active" : ""}
+          onClick={() => setView("trainer")}
+        >
+          {t.map.trainerNavLabel}
+        </button>
+        <button
+          type="button"
+          className={view === "map" ? "view-switcher-active" : ""}
+          onClick={() => setView("map")}
+        >
+          {t.map.navLabel}
+        </button>
+      </div>
+
+      {view === "map" ? (
+        <SkillMap openings={openings} progress={progress} t={t} onTrainLine={handleMapSelect} />
+      ) : (
+        <div className="app-shell">
+          <HowToUseBanner text={t.howToUse} dismissLabel={t.dismissGuide} />
+          <Sidebar
+            lines={openings}
+            selectedId={selectedId}
+            playerColor={playerColor}
+            onSelect={handleSelect}
+            onOpenFinder={() => setFinderOpen(true)}
+            progress={progress}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+            language={language}
+            onToggleLanguage={toggleLanguage}
+            t={t}
+          />
+          <main className="board-column">
+            <BoardPanel
+              fen={trainer.fen}
+              playerColor={playerColor}
+              isPlayerTurn={trainer.isPlayerTurn}
+              feedback={trainer.feedback}
+              lastWrongSquares={trainer.lastWrongSquares}
+              hintSan={trainer.revealedHint}
+              onDrop={handleDrop}
+            />
+          </main>
+          <InfoPanel
+            line={line}
+            playerColor={playerColor}
+            mode={mode}
+            history={trainer.history}
+            moveIndex={trainer.moveIndex}
+            totalMoves={trainer.totalMoves}
+            isDone={trainer.isDone}
+            feedback={trainer.feedback}
+            wrongAttempts={trainer.wrongAttempts}
+            revealedHint={trainer.revealedHint}
+            currentComment={trainer.currentComment}
+            whiteStrategy={trainer.whiteStrategy}
+            blackStrategy={trainer.blackStrategy}
+            isPlayerTurn={trainer.isPlayerTurn}
+            canExtend={Boolean(line.extension) && !extended}
+            t={t}
+            onColorChange={setPlayerColor}
+            onModeChange={setMode}
+            onRestart={handleRestart}
+            onHint={trainer.requestHint}
+            onNextLine={handleNextLine}
+            onExtend={handleExtend}
+          />
+
+          {finderOpen && (
+            <OpeningFinder
+              openings={openings}
+              canonicalOpenings={openingsEn}
+              t={t}
+              onSelect={handleFinderSelect}
+              onClose={() => setFinderOpen(false)}
+            />
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 }
 
