@@ -24,6 +24,7 @@ export interface MapCopy {
   trainerNavLabel: string;
   title: string;
   subtitle: string;
+  howToUse: string;
   rankTitles: [string, string, string, string, string];
   pointsLabel: (points: number, total: number) => string;
   // Index 0 is the "not started" state; 1-4 are the actual medal tiers
@@ -178,6 +179,8 @@ const en: Dictionary = {
     trainerNavLabel: "♟️ Trainer",
     title: "Opening Skill Map",
     subtitle: "Every family is its own constellation. Complete a line to earn Bronze, then repeat it for Silver, Gold, and Diamond — the family's capstone tracks its weakest line.",
+    howToUse:
+      "Complete a line in Practice mode to earn its Bronze medal — repeating it keeps raising it through Silver, Gold, and Diamond. A family's capstone medal reflects its weakest line, so mastering every line in a family raises it too. Study mode doesn't count toward medals.",
     rankTitles: ["Novice", "Apprentice", "Skilled", "Master", "Grandmaster"],
     pointsLabel: (points, total) => `${points} / ${total} medal points`,
     medalNames: ["Not started", "Bronze", "Silver", "Gold", "Diamond"],
@@ -287,6 +290,8 @@ const tr: Dictionary = {
     trainerNavLabel: "♟️ Antrenör",
     title: "Açılış Yetenek Haritası",
     subtitle: "Her aile kendi takımyıldızı. Bir hattı tamamla, Bronz kazan; tekrar tekrar çalışarak Gümüş, Altın ve Elmas'a yüksel — ailenin kapanış madalyası en zayıf hattını yansıtır.",
+    howToUse:
+      "Bir hattı Pratik modunda tamamlayınca Bronz madalyayı kazanırsın — tekrar tekrar çalışarak Gümüş, Altın ve Elmas'a yükselirsin. Ailenin kapanış madalyası en zayıf hattını yansıtır, yani ailedeki tüm hatlarda ustalaşmak onu da yükseltir. Çalışma modu madalyaya saymaz.",
     rankTitles: ["Acemi", "Çırak", "Yetenekli", "Usta", "Büyük Üstat"],
     pointsLabel: (points, total) => `${points} / ${total} madalya puanı`,
     medalNames: ["Başlanmadı", "Bronz", "Gümüş", "Altın", "Elmas"],

@@ -7,6 +7,7 @@ import {
 import type { OpeningLine } from "../data/openings";
 import type { LineProgress } from "../utils/storage";
 import type { Dictionary } from "../i18n/translations";
+import { HowToUseBanner } from "./HowToUseBanner";
 import "./SkillMap.css";
 
 interface SkillMapProps {
@@ -31,6 +32,12 @@ export function SkillMap({ openings, progress, t, onTrainLine }: SkillMapProps) 
 
   return (
     <div className="skill-map">
+      <HowToUseBanner
+        text={t.map.howToUse}
+        dismissLabel={t.dismissGuide}
+        storageKey="chess-opening-trainer-map-guide-dismissed"
+      />
+
       <div className="skill-map-header">
         <div>
           <h1>{t.map.title}</h1>

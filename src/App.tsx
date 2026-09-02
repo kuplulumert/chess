@@ -146,7 +146,11 @@ function App() {
         <SkillMap openings={openings} progress={progress} t={t} onTrainLine={handleMapSelect} />
       ) : (
         <div className="app-shell">
-          <HowToUseBanner text={t.howToUse} dismissLabel={t.dismissGuide} />
+          <HowToUseBanner
+            text={t.howToUse}
+            dismissLabel={t.dismissGuide}
+            storageKey="chess-opening-trainer-guide-dismissed"
+          />
           <Sidebar
             lines={openings}
             selectedId={selectedId}

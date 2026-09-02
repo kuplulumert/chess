@@ -5,6 +5,10 @@
   margin: 0 auto;
 }
 
+.skill-map .how-to-use {
+  margin-bottom: 20px;
+}
+
 .skill-map-header {
   display: flex;
   align-items: flex-start;

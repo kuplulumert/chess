@@ -1,10 +1,8 @@
 import { useState } from "react";
 
-const STORAGE_KEY = "chess-opening-trainer-guide-dismissed";
-
-function readDismissed(): boolean {
+function readDismissed(storageKey: string): boolean {
   try {
-    return localStorage.getItem(STORAGE_KEY) === "1";
+    return localStorage.getItem(storageKey) === "1";
   } catch {
     return false;
   }
@@ -13,17 +11,18 @@ function readDismissed(): boolean {
 interface HowToUseBannerProps {
   text: string;
   dismissLabel: string;
+  storageKey: string;
 }
 
-export function HowToUseBanner({ text, dismissLabel }: HowToUseBannerProps) {
-  const [dismissed, setDismissed] = useState(readDismissed);
+export function HowToUseBanner({ text, dismissLabel, storageKey }: HowToUseBannerProps) {
+  const [dismissed, setDismissed] = useState(() => readDismissed(storageKey));
 
   if (dismissed) return null;
 
   const handleDismiss = () => {
     setDismissed(true);
     try {
-      localStorage.setItem(STORAGE_KEY, "1");
+      localStorage.setItem(storageKey, "1");
     } catch {
       // Not persisted this time — the banner just reappears on the next visit.
     }
