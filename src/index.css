@@ -17,6 +17,14 @@
   --white-side-bg: #e2eefb;
   --black-side: #1e3f70;
   --black-side-bg: #dde5f0;
+  --tier-bronze: #a5651e;
+  --tier-bronze-bg: #f3e3d0;
+  --tier-silver: #6b7280;
+  --tier-silver-bg: #e7e9ec;
+  --tier-gold: #b8860b;
+  --tier-gold-bg: #f8ecc7;
+  --tier-diamond: #1f9ec9;
+  --tier-diamond-bg: #d8f3fb;
   --shadow: rgba(20, 22, 28, 0.08) 0 4px 16px -4px;
 
   --sans: system-ui, "Segoe UI", Roboto, sans-serif;
@@ -54,6 +62,14 @@
   --white-side-bg: rgba(156, 203, 245, 0.16);
   --black-side: #5c86d6;
   --black-side-bg: rgba(92, 134, 214, 0.22);
+  --tier-bronze: #d99a5c;
+  --tier-bronze-bg: rgba(217, 154, 92, 0.18);
+  --tier-silver: #b8bfc9;
+  --tier-silver-bg: rgba(184, 191, 201, 0.16);
+  --tier-gold: #f0c948;
+  --tier-gold-bg: rgba(240, 201, 72, 0.2);
+  --tier-diamond: #6fe3ff;
+  --tier-diamond-bg: rgba(111, 227, 255, 0.22);
   --shadow: rgba(0, 0, 0, 0.4) 0 4px 16px -4px;
   color-scheme: dark;
 }

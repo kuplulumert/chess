@@ -65,6 +65,7 @@
 }
 
 .constellation-node {
+  position: relative;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -88,16 +89,48 @@
   cursor: default;
 }
 
-.constellation-node-lit {
-  border-color: var(--accent);
-  background: var(--accent-bg);
-  color: var(--accent);
-  box-shadow: 0 0 12px 2px rgba(var(--accent-rgb), 0.35);
+/* Medal tiers reward repetition: Bronze on first completion, then Silver,
+   Gold, and Diamond as the trainee keeps replaying the line. Locked (0
+   completions) keeps the neutral default styling above. */
+.constellation-node-bronze {
+  border-color: var(--tier-bronze);
+  background: var(--tier-bronze-bg);
+  color: var(--tier-bronze);
+  box-shadow: 0 0 10px 1px rgba(var(--accent-rgb), 0.15);
 }
 
-.constellation-node-mastered {
-  border-color: var(--white-side);
-  box-shadow: 0 0 12px 2px rgba(var(--accent-rgb), 0.5);
+.constellation-node-silver {
+  border-color: var(--tier-silver);
+  background: var(--tier-silver-bg);
+  color: var(--tier-silver);
+  box-shadow: 0 0 12px 2px rgba(var(--accent-rgb), 0.2);
+}
+
+.constellation-node-gold {
+  border-color: var(--tier-gold);
+  background: var(--tier-gold-bg);
+  color: var(--tier-gold);
+  box-shadow: 0 0 14px 3px rgba(240, 201, 72, 0.4);
+}
+
+.constellation-node-diamond {
+  border-color: var(--tier-diamond);
+  background: var(--tier-diamond-bg);
+  color: var(--tier-diamond);
+  box-shadow: 0 0 18px 4px rgba(111, 227, 255, 0.5);
+}
+
+.constellation-node-badge {
+  position: absolute;
+  bottom: -6px;
+  right: -8px;
+  background: var(--panel-bg);
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0 4px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .constellation-connector {

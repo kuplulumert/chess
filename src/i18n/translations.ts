@@ -26,9 +26,15 @@ export interface MapCopy {
   subtitle: string;
   rankTitles: [string, string, string, string, string];
   pointsLabel: (points: number, total: number) => string;
-  capstoneLabel: (family: string) => string;
+  // Index 0 is the "not started" state; 1-4 are the actual medal tiers
+  // (bronze, silver, gold, diamond), unlocked by repeating a line.
+  medalNames: [string, string, string, string, string];
+  capstoneLabel: (family: string, medal: string) => string;
   capstoneLockedHint: string;
   lineLockedHint: string;
+  completionsLabel: (n: number) => string;
+  nextMedalHint: (remaining: number, nextMedal: string) => string;
+  maxMedalHint: string;
 }
 
 export interface Dictionary {
@@ -171,12 +177,17 @@ const en: Dictionary = {
     navLabel: "🗺️ Skill Map",
     trainerNavLabel: "♟️ Trainer",
     title: "Opening Skill Map",
-    subtitle: "Every family is its own constellation — light up a line by training it, light up the whole family for its capstone perk.",
+    subtitle: "Every family is its own constellation. Complete a line to earn Bronze, then repeat it for Silver, Gold, and Diamond — the family's capstone tracks its weakest line.",
     rankTitles: ["Novice", "Apprentice", "Skilled", "Master", "Grandmaster"],
-    pointsLabel: (points, total) => `${points} / ${total} perks unlocked`,
-    capstoneLabel: (family) => `${family} Master`,
-    capstoneLockedHint: "Unlock every line in this family to earn this perk",
+    pointsLabel: (points, total) => `${points} / ${total} medal points`,
+    medalNames: ["Not started", "Bronze", "Silver", "Gold", "Diamond"],
+    capstoneLabel: (family, medal) => `${family} Master — ${medal}`,
+    capstoneLockedHint: "Complete every line in this family to earn this medal",
     lineLockedHint: "Not trained yet — click to start",
+    completionsLabel: (n) => (n === 1 ? "Completed once" : `Completed ${n} times`),
+    nextMedalHint: (remaining, nextMedal) =>
+      `${remaining} more completion${remaining > 1 ? "s" : ""} → ${nextMedal}`,
+    maxMedalHint: "Top medal reached!",
   },
 };
 
@@ -275,12 +286,16 @@ const tr: Dictionary = {
     navLabel: "🗺️ Yetenek Haritası",
     trainerNavLabel: "♟️ Antrenör",
     title: "Açılış Yetenek Haritası",
-    subtitle: "Her aile kendi takımyıldızı — bir hattı çalışarak ışığını yak, aileyi tamamlayınca kapanış perk'ini kazan.",
+    subtitle: "Her aile kendi takımyıldızı. Bir hattı tamamla, Bronz kazan; tekrar tekrar çalışarak Gümüş, Altın ve Elmas'a yüksel — ailenin kapanış madalyası en zayıf hattını yansıtır.",
     rankTitles: ["Acemi", "Çırak", "Yetenekli", "Usta", "Büyük Üstat"],
-    pointsLabel: (points, total) => `${points} / ${total} perk açıldı`,
-    capstoneLabel: (family) => `${family} Ustası`,
-    capstoneLockedHint: "Bu perk'i kazanmak için bu ailedeki tüm hatları aç",
+    pointsLabel: (points, total) => `${points} / ${total} madalya puanı`,
+    medalNames: ["Başlanmadı", "Bronz", "Gümüş", "Altın", "Elmas"],
+    capstoneLabel: (family, medal) => `${family} Ustası — ${medal}`,
+    capstoneLockedHint: "Bu madalyayı kazanmak için bu ailedeki tüm hatları tamamla",
     lineLockedHint: "Henüz çalışılmadı — başlamak için tıkla",
+    completionsLabel: (n) => (n === 1 ? "Bir kez tamamlandı" : `${n} kez tamamlandı`),
+    nextMedalHint: (remaining, nextMedal) => `${remaining} tekrar daha → ${nextMedal}`,
+    maxMedalHint: "En üst madalyaya ulaşıldı!",
   },
 };
 
