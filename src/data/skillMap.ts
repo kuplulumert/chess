@@ -4,8 +4,9 @@ import type { LineProgress } from "../utils/storage";
 
 // Medal tiers reward repeated practice, not just a first completion —
 // index 0 is "not started"; 1-4 are the actual medals, unlocked by total
-// completions (summed across both colors) reaching each threshold.
-export const MEDAL_THRESHOLDS = [0, 1, 3, 6, 10] as const;
+// completions (summed across both colors) reaching each threshold. The gap
+// widens sharply toward the top so Diamond takes real, sustained repetition.
+export const MEDAL_THRESHOLDS = [0, 1, 5, 15, 30] as const;
 export const MEDAL_KEYS = ["locked", "bronze", "silver", "gold", "diamond"] as const;
 export type MedalKey = (typeof MEDAL_KEYS)[number];
 
