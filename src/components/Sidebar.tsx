@@ -66,7 +66,7 @@ export function Sidebar({
         </div>
         <p className="sidebar-subtitle">{t.appSubtitle}</p>
       </div>
-      <button type="button" className="finder-trigger" onClick={onOpenFinder}>
+      <button type="button" className="finder-trigger" data-tour="finder" onClick={onOpenFinder}>
         {t.finder.trigger}
       </button>
       <input

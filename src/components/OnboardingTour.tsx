@@ -10,15 +10,15 @@ const TOOLTIP_MIN_SPACE = 190;
 const NARROW_LAYOUT_BREAKPOINT = 860; // matches App.css's mobile breakpoint, where columns stack
 
 const STEP_SELECTORS = [
-  "[data-tour='nav']",
+  "[data-tour='finder']",
   "[data-tour='sidebar']",
   "[data-tour='board']",
   "[data-tour='info-panel']",
 ] as const;
 // Sidebar and info-panel are full-height sticky columns on desktop, so
 // above/below placement has nowhere to go — point sideways at them instead.
-// The nav bar and board are normal-height elements, so below/above works
-// fine for them.
+// The finder button and board are normal-height elements, so below/above
+// works fine for them.
 const STEP_SIDE_PLACEMENT: Array<"right" | "left" | null> = [null, "right", null, "left"];
 
 interface Rect {

@@ -126,7 +126,7 @@ function App() {
 
   return (
     <>
-      <div className="view-switcher" data-tour="nav">
+      <div className="view-switcher">
         <button
           type="button"
           className={view === "trainer" ? "view-switcher-active" : ""}

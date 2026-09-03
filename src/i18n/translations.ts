@@ -191,12 +191,12 @@ const en: Dictionary = {
   tour: {
     steps: [
       {
-        title: "Opening Trainer",
-        body: "You're in the Trainer — drill and play moves here. Switch to Skill Map anytime to see your medals and overall progress.",
+        title: "Find My Opening",
+        body: "Not sure where to start? Answer a few quick questions about your style — first move, risk, theory — and we'll recommend an opening to try.",
       },
       {
         title: "Pick an opening",
-        body: "Search or browse by family here, switch the Play As color, or try Find My Opening for a quick recommendation based on your style.",
+        body: "Search or browse by family here, and switch the Play As color to train either side.",
       },
       {
         title: "Play the moves",
@@ -327,12 +327,12 @@ const tr: Dictionary = {
   tour: {
     steps: [
       {
-        title: "Açılış Antrenörü",
-        body: "Şu an Antrenör'desin — hamleleri burada çalışıp oynarsın. İstediğin zaman Yetenek Haritası'na geçip madalyalarını ve genel ilerlemeni görebilirsin.",
+        title: "Açılış Bul",
+        body: "Nereden başlayacağını bilmiyor musun? Tarzınla ilgili birkaç soruyu cevapla — ilk hamle, risk, teori — sana uygun bir açılış önerelim.",
       },
       {
         title: "Açılışını seç",
-        body: "Buradan açılış ara, aileye göre gözat, taraf seç, ya da tarzına uygun hızlı bir öneri için 'Açılış Bul'u dene.",
+        body: "Buradan açılış ara, aileye göre gözat, ve taraf seçerek iki taraftan da çalış.",
       },
       {
         title: "Hamleleri oyna",
