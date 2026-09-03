@@ -25,7 +25,7 @@ export interface TourStepCopy {
 }
 
 export interface TourCopy {
-  steps: [TourStepCopy, TourStepCopy, TourStepCopy];
+  steps: [TourStepCopy, TourStepCopy, TourStepCopy, TourStepCopy];
   stepLabel: (current: number, total: number) => string;
   skip: string;
   next: string;
@@ -191,6 +191,10 @@ const en: Dictionary = {
   tour: {
     steps: [
       {
+        title: "Opening Trainer",
+        body: "You're in the Trainer — drill and play moves here. Switch to Skill Map anytime to see your medals and overall progress.",
+      },
+      {
         title: "Pick an opening",
         body: "Search or browse by family here, switch the Play As color, or try Find My Opening for a quick recommendation based on your style.",
       },
@@ -322,6 +326,10 @@ const tr: Dictionary = {
 
   tour: {
     steps: [
+      {
+        title: "Açılış Antrenörü",
+        body: "Şu an Antrenör'desin — hamleleri burada çalışıp oynarsın. İstediğin zaman Yetenek Haritası'na geçip madalyalarını ve genel ilerlemeni görebilirsin.",
+      },
       {
         title: "Açılışını seç",
         body: "Buradan açılış ara, aileye göre gözat, taraf seç, ya da tarzına uygun hızlı bir öneri için 'Açılış Bul'u dene.",
