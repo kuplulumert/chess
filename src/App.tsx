@@ -8,6 +8,7 @@ import { BoardPanel } from "./components/BoardPanel";
 import { InfoPanel } from "./components/InfoPanel";
 import { OpeningFinder } from "./components/OpeningFinder";
 import { SkillMap } from "./components/SkillMap";
+import { OnboardingTour } from "./components/OnboardingTour";
 import { getAllProgress, recordCompletion } from "./utils/storage";
 import { useOpeningTrainer, type PlayerColor, type TrainerMode } from "./hooks/useOpeningTrainer";
 import { useTheme } from "./hooks/useTheme";
@@ -167,7 +168,7 @@ function App() {
             onToggleLanguage={toggleLanguage}
             t={t}
           />
-          <main className="board-column">
+          <main className="board-column" data-tour="board">
             <BoardPanel
               fen={trainer.fen}
               playerColor={playerColor}
@@ -212,6 +213,8 @@ function App() {
               onClose={() => setFinderOpen(false)}
             />
           )}
+
+          <OnboardingTour t={t} />
         </div>
       )}
     </>

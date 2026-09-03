@@ -19,6 +19,19 @@ export interface FinderCopy {
   close: string;
 }
 
+export interface TourStepCopy {
+  title: string;
+  body: string;
+}
+
+export interface TourCopy {
+  steps: [TourStepCopy, TourStepCopy, TourStepCopy];
+  stepLabel: (current: number, total: number) => string;
+  skip: string;
+  next: string;
+  getStarted: string;
+}
+
 export interface MapCopy {
   navLabel: string;
   trainerNavLabel: string;
@@ -81,6 +94,7 @@ export interface Dictionary {
 
   finder: FinderCopy;
   map: MapCopy;
+  tour: TourCopy;
 }
 
 const en: Dictionary = {
@@ -172,6 +186,27 @@ const en: Dictionary = {
     noMatch: "No strong match — try starting over with different answers.",
     studyThis: "Study this",
     close: "Close",
+  },
+
+  tour: {
+    steps: [
+      {
+        title: "Pick an opening",
+        body: "Search or browse by family here, switch the Play As color, or try Find My Opening for a quick recommendation based on your style.",
+      },
+      {
+        title: "Play the moves",
+        body: "Drag pieces here yourself. Study mode always shows the next move; Practice mode makes you find it before revealing a hint.",
+      },
+      {
+        title: "Understand why",
+        body: "See what each side just played and why, track your progress toward the line, and unlock a +5 move extension once you finish it.",
+      },
+    ],
+    stepLabel: (current, total) => `${current} / ${total}`,
+    skip: "Skip",
+    next: "Next",
+    getStarted: "Get started",
   },
 
   map: {
@@ -283,6 +318,27 @@ const tr: Dictionary = {
     noMatch: "Güçlü bir eşleşme yok — farklı cevaplarla baştan dene.",
     studyThis: "Bunu çalış",
     close: "Kapat",
+  },
+
+  tour: {
+    steps: [
+      {
+        title: "Açılışını seç",
+        body: "Buradan açılış ara, aileye göre gözat, taraf seç, ya da tarzına uygun hızlı bir öneri için 'Açılış Bul'u dene.",
+      },
+      {
+        title: "Hamleleri oyna",
+        body: "Taşları buraya kendin sürükle. Çalışma modunda bir sonraki hamle her zaman gösterilir; Pratik modunda ipucu gösterilmeden önce kendin bulmaya çalışırsın.",
+      },
+      {
+        title: "Nedenini anla",
+        body: "Her tarafın az önce ne oynadığını ve nedenini gör, ilerlemeni takip et, açılışı bitirince +5 hamlelik uzatmayı aç.",
+      },
+    ],
+    stepLabel: (current, total) => `${current} / ${total}`,
+    skip: "Atla",
+    next: "İleri",
+    getStarted: "Başlayalım",
   },
 
   map: {

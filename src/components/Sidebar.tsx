@@ -51,7 +51,7 @@ export function Sidebar({
   const groups = useMemo(() => groupByFamily(filtered), [filtered]);
 
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" data-tour="sidebar">
       <div className="sidebar-header">
         <div className="sidebar-header-row">
           <h1>{t.appTitle}</h1>

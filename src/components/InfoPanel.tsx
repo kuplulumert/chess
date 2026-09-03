@@ -67,7 +67,7 @@ export function InfoPanel({
   const colorLabel = playerColor === "w" ? t.white : t.black;
 
   return (
-    <aside className="info-panel">
+    <aside className="info-panel" data-tour="info-panel">
       <div className="info-card">
         <div className="opening-name-wrap" tabIndex={0}>
           <h2>{line.name}</h2>

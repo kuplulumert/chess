@@ -1,0 +1,81 @@
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
+
+.tour-spotlight {
+  position: fixed;
+  border-radius: 14px;
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.72);
+  transition:
+    top 250ms ease,
+    left 250ms ease,
+    width 250ms ease,
+    height 250ms ease;
+  pointer-events: none;
+}
+
+.tour-tooltip {
+  position: fixed;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+  transition:
+    top 250ms ease,
+    bottom 250ms ease,
+    left 250ms ease;
+}
+
+.tour-step-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.tour-title {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.tour-body {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.tour-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.tour-skip {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  padding: 6px 4px;
+}
+
+.tour-skip:hover {
+  color: var(--text-h);
+}
+
+.tour-next {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: var(--panel-bg);
+  font-size: 13px;
+  font-weight: 700;
+}
