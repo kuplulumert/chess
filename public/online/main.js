@@ -1,28 +1,14 @@
 import { Chess } from "./vendor/chess.esm.js";
+import { joinRoom } from "./vendor/trystero-nostr.mjs";
 
+const APP_ID = "kuplulumert-online-chess";
 const WHITE_GLYPHS = { p: "♙", n: "♘", b: "♗", r: "♖", q: "♕", k: "♔" };
 const BLACK_GLYPHS = { p: "♟", n: "♞", b: "♝", r: "♜", q: "♛", k: "♚" };
 
-const els = {
-  lobby: document.getElementById("lobby"),
-  createBtn: document.getElementById("create-btn"),
-  sharePanel: document.getElementById("share-panel"),
-  shareLink: document.getElementById("share-link"),
-  copyBtn: document.getElementById("copy-btn"),
-  lobbyStatus: document.getElementById("lobby-status"),
-  retryBtn: document.getElementById("retry-btn"),
-  game: document.getElementById("game"),
-  board: document.getElementById("board"),
-  colorLabel: document.getElementById("color-label"),
-  turnLabel: document.getElementById("turn-label"),
-  gameStatus: document.getElementById("game-status"),
-  leaveBtn: document.getElementById("leave-btn"),
-};
-
-// STUN alone fails whenever both players are behind carrier-grade NAT (common
-// on mobile data), so a TURN relay is required for the connection to succeed
-// reliably. Open Relay Project's free TURN server is meant for exactly this.
-const ICE_CONFIG = {
+// Peer discovery goes over public nostr relays, but the actual WebRTC link
+// still needs a relay of its own whenever both players sit behind carrier-grade
+// NAT (common on mobile data). Open Relay Project's free TURN covers that.
+const RTC_CONFIG = {
   iceServers: [
     { urls: "stun:stun.l.google.com:19302" },
     { urls: "stun:stun1.l.google.com:19302" },
@@ -36,32 +22,98 @@ const ICE_CONFIG = {
   ],
 };
 
-const CONNECT_TIMEOUT_MS = 20000;
+const GUEST_TIMEOUT_MS = 60000;
+const PING_INTERVAL_MS = 4000;
+
+// Trystero opens its own sockets to a large pool of public nostr relays and
+// doesn't report when they come up, so probe one directly just to tell the
+// player whether the signalling network is reachable at all from their network.
+const PROBE_RELAYS = ["wss://nos.lol", "wss://relay.mostr.pub", "wss://purplerelay.com"];
+
+const els = {
+  lobby: document.getElementById("lobby"),
+  createBtn: document.getElementById("create-btn"),
+  sharePanel: document.getElementById("share-panel"),
+  shareLink: document.getElementById("share-link"),
+  copyBtn: document.getElementById("copy-btn"),
+  steps: document.getElementById("steps"),
+  stepWaitText: document.getElementById("step-wait-text"),
+  waitClock: document.getElementById("wait-clock"),
+  roomLabel: document.getElementById("room-label"),
+  lobbyStatus: document.getElementById("lobby-status"),
+  retryBtn: document.getElementById("retry-btn"),
+  game: document.getElementById("game"),
+  board: document.getElementById("board"),
+  colorLabel: document.getElementById("color-label"),
+  connLabel: document.getElementById("conn-label"),
+  turnLabel: document.getElementById("turn-label"),
+  gameStatus: document.getElementById("game-status"),
+  lastMove: document.getElementById("last-move"),
+  leaveBtn: document.getElementById("leave-btn"),
+};
 
 const chess = new Chess();
-let peer = null;
-let conn = null;
-let myColor = null; // 'w' | 'b'
+let room = null;
+let moveAction = null;
+let opponentId = null;
+let myColor = null;
 let selected = null;
 let legalTargets = [];
+let lastMoveSquares = null;
 let squareEls = new Map();
-let connectTimeoutId = null;
+let joinTimeoutId = null;
+let pingIntervalId = null;
+let waitClockId = null;
 
-function armConnectTimeout(onTimeout) {
-  clearConnectTimeout();
-  connectTimeoutId = setTimeout(onTimeout, CONNECT_TIMEOUT_MS);
-}
-
-function clearConnectTimeout() {
-  if (connectTimeoutId) {
-    clearTimeout(connectTimeoutId);
-    connectTimeoutId = null;
-  }
+function setStep(name, state) {
+  const li = els.steps.querySelector(`[data-step="${name}"]`);
+  if (!li) return;
+  li.dataset.state = state;
+  li.querySelector(".step-icon").textContent =
+    state === "done" ? "✓" : state === "active" ? "•" : state === "failed" ? "✕" : "○";
 }
 
 function showRetry(message) {
   els.lobbyStatus.textContent = message;
   els.retryBtn.classList.remove("hidden");
+}
+
+function probeRelays() {
+  return new Promise((resolve) => {
+    let settled = false;
+    const sockets = PROBE_RELAYS.map((url) => {
+      let socket;
+      try {
+        socket = new WebSocket(url);
+      } catch {
+        return null;
+      }
+      socket.onopen = () => {
+        if (!settled) {
+          settled = true;
+          resolve(true);
+        }
+        sockets.forEach((s) => s && s.close());
+      };
+      return socket;
+    });
+
+    setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        resolve(false);
+        sockets.forEach((s) => s && s.close());
+      }
+    }, 10000);
+  });
+}
+
+function startWaitClock() {
+  const startedAt = Date.now();
+  return setInterval(() => {
+    const seconds = Math.round((Date.now() - startedAt) / 1000);
+    els.waitClock.textContent = `${seconds} sn bekleniyor...`;
+  }, 1000);
 }
 
 function randomRoomId(length = 6) {
@@ -105,6 +157,10 @@ function buildBoard(orientation) {
 function render() {
   for (const [square, div] of squareEls) {
     div.classList.toggle("selected", square === selected);
+    div.classList.toggle(
+      "last-move",
+      Boolean(lastMoveSquares) && (square === lastMoveSquares.from || square === lastMoveSquares.to),
+    );
     div.innerHTML = "";
     const piece = chess.get(square);
     if (piece) {
@@ -143,8 +199,7 @@ function updateStatus() {
     return;
   }
 
-  const turn = chess.turn();
-  els.turnLabel.textContent = turn === myColor ? "Sıra sende" : "Rakibin sırası";
+  els.turnLabel.textContent = chess.turn() === myColor ? "Sıra sende" : "Rakibin sırası";
   els.gameStatus.textContent = chess.isCheck() ? "Şah!" : "";
 }
 
@@ -154,7 +209,7 @@ function clearSelection() {
 }
 
 function onSquareClick(square) {
-  if (!conn || !conn.open || chess.isGameOver()) return;
+  if (!opponentId || chess.isGameOver()) return;
   if (chess.turn() !== myColor) return;
 
   const piece = chess.get(square);
@@ -165,8 +220,7 @@ function onSquareClick(square) {
       render();
       return;
     }
-    const target = legalTargets.find((m) => m.to === square);
-    if (target) {
+    if (legalTargets.some((m) => m.to === square)) {
       makeMove(selected, square);
       return;
     }
@@ -195,8 +249,9 @@ function makeMove(from, to) {
   const promotion =
     piece && piece.type === "p" && (to[1] === "8" || to[1] === "1") ? "q" : undefined;
 
+  let move;
   try {
-    chess.move({ from, to, promotion });
+    move = chess.move({ from, to, promotion });
   } catch {
     clearSelection();
     render();
@@ -204,20 +259,26 @@ function makeMove(from, to) {
   }
 
   clearSelection();
+  lastMoveSquares = { from, to };
   render();
-  conn.send({ type: "move", from, to, promotion });
+  els.lastMove.textContent = `Oynadığın hamle: ${move.san} — gönderildi`;
+  moveAction.send({ from, to, promotion: promotion ?? null });
 }
 
-function applyRemoteMove({ from, to, promotion }) {
+function applyRemoteMove(data) {
+  const { from, to, promotion } = data;
+  let move;
   try {
-    chess.move({ from, to, promotion });
+    move = chess.move({ from, to, promotion: promotion ?? undefined });
   } catch (err) {
-    console.error("Rakipten gelen hamle uygulanamadı, senkron bozuldu.", err);
-    els.gameStatus.textContent = "Bağlantı senkron dışı kaldı, yeni oyun başlatın.";
+    console.error("Rakipten gelen hamle uygulanamadı:", err);
+    els.gameStatus.textContent = "Hamleler senkron dışı kaldı, yeni oyun başlatın.";
     return;
   }
   clearSelection();
+  lastMoveSquares = { from, to };
   render();
+  els.lastMove.textContent = `Rakibin hamlesi: ${move.san}`;
 }
 
 function showGame() {
@@ -225,102 +286,112 @@ function showGame() {
   els.game.classList.remove("hidden");
   buildBoard(myColor);
   render();
+  els.lastMove.textContent = "Oyun başladı. Beyaz başlar.";
 }
 
-function setupConnection(connection, { announceReady }) {
-  conn = connection;
+function setConnected(isConnected, detail) {
+  els.connLabel.className = isConnected ? "conn-ok" : "conn-lost";
+  els.connLabel.textContent = isConnected ? `● ${detail ?? "bağlı"}` : "● bağlantı koptu";
+}
 
-  conn.on("open", () => {
-    clearConnectTimeout();
+function startPinging() {
+  stopPinging();
+  pingIntervalId = setInterval(async () => {
+    if (!room || !opponentId) return;
+    try {
+      const ms = await room.ping(opponentId);
+      setConnected(true, `bağlı · ${ms} ms`);
+    } catch {
+      setConnected(false);
+    }
+  }, PING_INTERVAL_MS);
+}
+
+function stopPinging() {
+  if (pingIntervalId) {
+    clearInterval(pingIntervalId);
+    pingIntervalId = null;
+  }
+}
+
+function connect(roomId, { isHost }) {
+  myColor = isHost ? "w" : "b";
+  els.steps.classList.remove("hidden");
+  els.stepWaitText.textContent = isHost ? "Rakip bekleniyor" : "Oyun aranıyor";
+  setStep("relay", "active");
+
+  room = joinRoom({ appId: APP_ID, rtcConfig: RTC_CONFIG }, roomId, {
+    onJoinError: (details) => {
+      console.error("Odaya katılınamadı:", details);
+      setStep("relay", "failed");
+      showRetry("Sinyal ağına bağlanılamadı.");
+    },
+  });
+
+  moveAction = room.makeAction("move");
+  moveAction.onMessage = (data, context) => {
+    if (context.peerId !== opponentId) return;
+    applyRemoteMove(data);
+  };
+
+  els.roomLabel.textContent = `Oda kodu: ${roomId}`;
+  setStep("wait", "active");
+  waitClockId = startWaitClock();
+  els.lobbyStatus.textContent = isHost
+    ? "Link hazır. Arkadaşın linke tıkladığı anda burada göreceksin."
+    : "Oyunu açan arkadaşın aranıyor...";
+
+  probeRelays().then((reachable) => {
+    setStep("relay", reachable ? "done" : "failed");
+    if (!reachable) {
+      els.lobbyStatus.textContent =
+        "Sinyal ağına ulaşılamıyor (ağın WebSocket bağlantılarını engelliyor olabilir). Bağlantı yine de denenmeye devam ediyor.";
+    }
+  });
+
+  if (!isHost) {
+    joinTimeoutId = setTimeout(() => {
+      clearInterval(waitClockId);
+      setStep("wait", "failed");
+      showRetry(
+        "Rakip bulunamadı. Arkadaşının sayfayı hâlâ açık tuttuğundan emin ol, sonra tekrar dene.",
+      );
+    }, GUEST_TIMEOUT_MS);
+  }
+
+  room.onPeerJoin = (peerId) => {
+    if (opponentId) return; // a game is two players; ignore extra joiners
+    clearTimeout(joinTimeoutId);
+    clearInterval(waitClockId);
+    els.waitClock.textContent = "";
+    // A peer arriving proves the signalling network worked, whatever the
+    // standalone probe made of it.
+    setStep("relay", "done");
+    opponentId = peerId;
+    setStep("wait", "done");
+    setStep("peer", "done");
+    setStep("ready", "done");
+    setConnected(true);
     showGame();
-    if (announceReady) {
-      els.lobbyStatus.textContent = "";
-    }
-  });
+    startPinging();
+  };
 
-  conn.on("data", (data) => {
-    if (data && data.type === "move") {
-      applyRemoteMove(data);
-    }
-  });
-
-  conn.on("close", () => {
-    els.gameStatus.textContent = "Rakibin bağlantısı kesildi.";
-  });
-
-  conn.on("error", (err) => {
-    console.error(err);
-    els.gameStatus.textContent = "Bağlantı hatası oluştu.";
-  });
+  room.onPeerLeave = (peerId) => {
+    if (peerId !== opponentId) return;
+    opponentId = null;
+    stopPinging();
+    setConnected(false);
+    els.gameStatus.textContent = "Rakibin ayrıldı. Aynı linki tekrar açarsa bağlanır.";
+  };
 }
 
-function startHost() {
+els.createBtn.addEventListener("click", () => {
   const roomId = randomRoomId();
-  myColor = "w";
-
-  els.createBtn.disabled = true;
-  els.lobbyStatus.textContent = "Oda oluşturuluyor...";
-
-  peer = new Peer(roomId, { config: ICE_CONFIG });
-
-  peer.on("open", (id) => {
-    const link = `${location.origin}${location.pathname}?room=${id}`;
-    els.shareLink.value = link;
-    els.sharePanel.classList.remove("hidden");
-    els.lobbyStatus.textContent = "Arkadaşının bağlanması bekleniyor...";
-  });
-
-  peer.on("connection", (connection) => {
-    els.lobbyStatus.textContent = "Arkadaşınla bağlantı kuruluyor...";
-    armConnectTimeout(() => {
-      showRetry("Bağlantı çok uzun sürdü. Arkadaşın linke tekrar tıklamayı dener misin?");
-    });
-    setupConnection(connection, { announceReady: true });
-  });
-
-  peer.on("error", (err) => {
-    console.error(err);
-    clearConnectTimeout();
-    if (err.type === "unavailable-id") {
-      els.createBtn.disabled = false;
-      els.lobbyStatus.textContent = "Oda oluşturulamadı, tekrar deneniyor...";
-      peer.destroy();
-      startHost();
-      return;
-    }
-    showRetry("Bağlantı sunucusuna ulaşılamadı.");
-  });
-}
-
-function startGuest(roomId) {
-  myColor = "b";
-  els.lobbyStatus.textContent = "Oyuna bağlanılıyor... (biraz sürebilir)";
-
-  peer = new Peer(undefined, { config: ICE_CONFIG });
-
-  armConnectTimeout(() => {
-    if (peer) peer.destroy();
-    showRetry("Bağlantı çok uzun sürdü. Tekrar dene, ya da oyunu açan arkadaşının sayfayı hâlâ açık tuttuğundan emin ol.");
-  });
-
-  peer.on("open", () => {
-    const connection = peer.connect(roomId, { reliable: true });
-    setupConnection(connection, { announceReady: false });
-  });
-
-  peer.on("error", (err) => {
-    console.error(err);
-    if (err.type === "peer-unavailable") {
-      clearConnectTimeout();
-      showRetry("Bu oyun bulunamadı. Link geçersiz olabilir ya da rakip ayrıldı.");
-      return;
-    }
-    clearConnectTimeout();
-    showRetry("Bağlantı sunucusuna ulaşılamadı.");
-  });
-}
-
-els.createBtn.addEventListener("click", startHost);
+  els.createBtn.classList.add("hidden");
+  els.shareLink.value = `${location.origin}${location.pathname}?room=${roomId}`;
+  els.sharePanel.classList.remove("hidden");
+  connect(roomId, { isHost: true });
+});
 
 els.copyBtn.addEventListener("click", async () => {
   try {
@@ -332,16 +403,15 @@ els.copyBtn.addEventListener("click", async () => {
   }
 });
 
-els.retryBtn.addEventListener("click", () => {
-  location.reload();
-});
+els.retryBtn.addEventListener("click", () => location.reload());
 
 els.leaveBtn.addEventListener("click", () => {
+  if (room) room.leave();
   location.href = location.pathname;
 });
 
 const roomParam = new URLSearchParams(location.search).get("room");
 if (roomParam) {
   els.createBtn.classList.add("hidden");
-  startGuest(roomParam);
+  connect(roomParam, { isHost: false });
 }

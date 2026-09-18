@@ -3,6 +3,7 @@
   --light-square: #f0d9b5;
   --dark-square: #b58863;
   --highlight: #f6f682;
+  --last-move: #cdd26a;
   --move-dot: rgba(20, 20, 20, 0.35);
   --board-size: min(90vw, 520px);
 }
@@ -82,6 +83,66 @@ button:hover {
   text-align: center;
 }
 
+.subtle {
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.steps li {
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.steps li[data-state="active"] {
+  color: #eee;
+}
+
+.steps li[data-state="done"] {
+  color: #7bc08c;
+}
+
+.steps li[data-state="failed"] {
+  color: #d98b8b;
+}
+
+.step-icon {
+  width: 1em;
+  text-align: center;
+}
+
+.steps li[data-state="active"] .step-icon {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.conn-ok {
+  color: #7bc08c;
+  font-weight: 400;
+}
+
+.conn-lost {
+  color: #d98b8b;
+  font-weight: 400;
+}
+
 #game {
   width: 100%;
   display: flex;
@@ -124,6 +185,10 @@ button:hover {
 
 .square.dark {
   background: var(--dark-square);
+}
+
+.square.last-move {
+  background: var(--last-move) !important;
 }
 
 .square.selected {

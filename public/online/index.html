@@ -21,25 +21,35 @@
           </div>
         </div>
 
+        <ol id="steps" class="steps hidden">
+          <li data-step="relay"><span class="step-icon">○</span> Sinyal ağına bağlanılıyor</li>
+          <li data-step="wait"><span class="step-icon">○</span> <span id="step-wait-text">Rakip bekleniyor</span></li>
+          <li data-step="peer"><span class="step-icon">○</span> Rakip bulundu, bağlantı kuruluyor</li>
+          <li data-step="ready"><span class="step-icon">○</span> Bağlantı hazır</li>
+        </ol>
+
+        <p id="wait-clock" class="status subtle"></p>
         <p id="lobby-status" class="status"></p>
+        <p id="room-label" class="status subtle"></p>
         <button id="retry-btn" type="button" class="hidden">Tekrar Dene</button>
       </section>
 
       <section id="game" class="hidden">
         <div class="status-bar">
           <span id="color-label"></span>
+          <span id="conn-label" class="conn-ok">● bağlı</span>
           <span id="turn-label"></span>
         </div>
 
         <div id="board" class="board"></div>
 
         <p id="game-status" class="status"></p>
+        <p id="last-move" class="status subtle"></p>
 
         <button id="leave-btn" type="button">Ana Sayfaya Dön</button>
       </section>
     </div>
 
-    <script src="vendor/peerjs.min.js"></script>
     <script type="module" src="main.js"></script>
   </body>
 </html>
