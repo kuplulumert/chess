@@ -8,11 +8,12 @@ and tells you when you've gone off book.
 
 There's also a separate, unrelated mini-site at
 [`/online/`](https://kuplulumert.github.io/chess/online/) ([source](public/online)) for
-playing a live game of chess against a friend: one person opens it, shares the
-generated link, and whoever opens that link plays the other side. No accounts and no
-server of our own — it's a static page, and the two browsers exchange moves through
-public MQTT brokers (EMQX, HiveMQ, Mosquitto), subscribing to a topic named after the
-random room code in the link.
+playing a live game of chess against a friend: one person starts a game and gets a
+six-character room code, the other types that code in, and they're playing. No accounts
+and no server of our own — it's a static page, and the two browsers exchange moves
+through public MQTT brokers (EMQX, HiveMQ, Mosquitto), subscribing to a topic named
+after the room code. Codes are drawn from an alphabet with no `i`/`l`/`o`/`0`/`1`, since
+they get read out loud as often as they get pasted.
 
 A peer-to-peer link would have been the obvious choice, and the page did use WebRTC at
 first, but it can't be relied on here: when both players sit behind carrier-grade NAT —

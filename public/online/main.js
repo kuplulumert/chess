@@ -20,17 +20,19 @@ const PING_INTERVAL_MS = 5000;
 const GUEST_TIMEOUT_MS = 90000;
 
 const els = {
-  lobby: document.getElementById("lobby"),
+  home: document.getElementById("home"),
   createBtn: document.getElementById("create-btn"),
-  sharePanel: document.getElementById("share-panel"),
-  shareLink: document.getElementById("share-link"),
-  copyBtn: document.getElementById("copy-btn"),
-  steps: document.getElementById("steps"),
-  stepWaitText: document.getElementById("step-wait-text"),
+  joinForm: document.getElementById("join-form"),
+  joinCode: document.getElementById("join-code"),
+  homeError: document.getElementById("home-error"),
+  waiting: document.getElementById("waiting"),
+  waitingTitle: document.getElementById("waiting-title"),
+  waitingHint: document.getElementById("waiting-hint"),
+  codeBox: document.getElementById("code-box"),
+  roomCode: document.getElementById("room-code"),
+  copyCode: document.getElementById("copy-code"),
+  details: document.getElementById("details"),
   transports: document.getElementById("transports"),
-  waitClock: document.getElementById("wait-clock"),
-  lobbyStatus: document.getElementById("lobby-status"),
-  roomLabel: document.getElementById("room-label"),
   retryBtn: document.getElementById("retry-btn"),
   game: document.getElementById("game"),
   board: document.getElementById("board"),
@@ -72,14 +74,6 @@ function randomId(length) {
   return id;
 }
 
-function setStep(name, state) {
-  const li = els.steps.querySelector(`[data-step="${name}"]`);
-  if (!li) return;
-  li.dataset.state = state;
-  li.querySelector(".step-icon").textContent =
-    state === "done" ? "✓" : state === "active" ? "•" : state === "failed" ? "✕" : "○";
-}
-
 function setBrokerState(url, text, kind) {
   const entry = clients.get(url);
   if (!entry) return;
@@ -87,8 +81,13 @@ function setBrokerState(url, text, kind) {
   entry.stateEl.parentElement.dataset.state = kind;
 }
 
-function showRetry(message) {
-  els.lobbyStatus.textContent = message;
+// Connection details stay out of the way while things are working, and only
+// surface when there's a problem worth showing someone.
+function showProblem(message) {
+  els.waitingTitle.textContent = message;
+  els.waitingTitle.classList.add("error");
+  els.waitingHint.textContent = "";
+  els.details.classList.remove("hidden");
   els.retryBtn.classList.remove("hidden");
 }
 
@@ -339,7 +338,7 @@ function handleMessage(raw) {
   } else if (message.t === "bye") {
     opponentId = null;
     updateConnLabel();
-    els.gameStatus.textContent = "Rakibin ayrıldı. Aynı linki tekrar açarsa devam edersiniz.";
+    els.gameStatus.textContent = "Rakibin ayrıldı. Aynı kodla tekrar girerse devam edersiniz.";
     startHellos();
   }
 }
@@ -357,10 +356,7 @@ function startGame() {
   if (gameStarted) return;
   gameStarted = true;
   clearInterval(waitClockId);
-  els.waitClock.textContent = "";
-  setStep("wait", "done");
-  setStep("ready", "done");
-  els.lobby.classList.add("hidden");
+  els.waiting.classList.add("hidden");
   els.game.classList.remove("hidden");
   buildBoard(myColor);
   render();
@@ -429,10 +425,15 @@ function startHellos() {
   }, HELLO_INTERVAL_MS);
 }
 
-function startWaitClock() {
+// A plain seconds counter reads like something is wrong. A hint that only
+// appears once the wait is genuinely long says the same thing more kindly.
+function startWaitClock(isHost) {
   const startedAt = Date.now();
   waitClockId = setInterval(() => {
-    els.waitClock.textContent = `${Math.round((Date.now() - startedAt) / 1000)} sn bekleniyor...`;
+    if (Date.now() - startedAt < 25000) return;
+    els.waitingHint.textContent = isHost
+      ? "Kodu doğru ilettiğinden emin ol, bekliyoruz."
+      : "Biraz uzun sürüyor. Kodun doğru olduğundan ve arkadaşının sayfayı açık tuttuğundan emin ol.";
   }, 1000);
 }
 
@@ -444,12 +445,14 @@ function brokerList() {
 function connect(roomId, { isHost }) {
   myColor = isHost ? "w" : "b";
   topic = `${TOPIC_PREFIX}/${roomId}`;
-  els.steps.classList.remove("hidden");
-  els.transports.classList.remove("hidden");
-  els.stepWaitText.textContent = isHost ? "Rakip bekleniyor" : "Oyun aranıyor";
-  els.roomLabel.textContent = `Oda kodu: ${roomId}`;
-  setStep("net", "active");
-  setStep("wait", "active");
+  els.home.classList.add("hidden");
+  els.waiting.classList.remove("hidden");
+  els.waitingTitle.textContent = isHost ? "Rakip bekleniyor" : "Oyuna bağlanılıyor";
+  if (isHost) {
+    els.roomCode.textContent = roomId.toUpperCase();
+    els.codeBox.classList.remove("hidden");
+    els.waitingHint.textContent = "Arkadaşın bu kodu girince oyun başlayacak.";
+  }
 
   for (const broker of brokerList()) {
     const li = document.createElement("li");
@@ -484,7 +487,6 @@ function connect(roomId, { isHost }) {
     client.on("connect", () => {
       entry.connected = true;
       setBrokerState(broker.url, "bağlı", "ok");
-      setStep("net", "done");
       client.subscribe(topic, { qos: 0 }, (err) => {
         if (err) {
           console.error(`${broker.label} konuya abone olunamadı:`, err);
@@ -511,15 +513,12 @@ function connect(roomId, { isHost }) {
     });
   }
 
-  startWaitClock();
-  els.lobbyStatus.textContent = isHost
-    ? "Link hazır. Arkadaşın linke tıkladığı anda oyun başlayacak."
-    : "Oyunu açan arkadaşın aranıyor...";
+  startWaitClock(isHost);
 
   setTimeout(() => {
     if (connectedClients().length === 0) {
-      setStep("net", "failed");
-      showRetry("Hiçbir sunucuya bağlanılamadı. Farklı bir ağ (örneğin mobil veri) dene.");
+      showProblem("Bağlantı kurulamadı");
+      els.waitingHint.textContent = "Farklı bir ağ (örneğin mobil veri) dene.";
     }
   }, 20000);
 
@@ -527,29 +526,54 @@ function connect(roomId, { isHost }) {
     joinTimeoutId = setTimeout(() => {
       if (opponentId) return;
       clearInterval(waitClockId);
-      setStep("wait", "failed");
-      showRetry("Rakip bulunamadı. Arkadaşının sayfayı açık tuttuğundan emin ol, sonra tekrar dene.");
+      showProblem("Bu kodla bir oyun bulunamadı");
+      els.waitingHint.textContent = "Kodu kontrol et, arkadaşının sayfası açık olmalı.";
     }, GUEST_TIMEOUT_MS);
   }
 }
 
-els.createBtn.addEventListener("click", () => {
-  const roomId = randomId(6);
-  els.createBtn.classList.add("hidden");
+// Codes are read out loud and typed in, so keep the URL in step with the room
+// and accept whatever spacing or case the other player typed.
+function rememberRoomInUrl(roomId) {
   const url = new URL(location.href);
   url.searchParams.set("room", roomId);
-  els.shareLink.value = url.toString();
-  els.sharePanel.classList.remove("hidden");
+  history.replaceState(null, "", url);
+}
+
+function normalizeCode(input) {
+  return input.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+els.createBtn.addEventListener("click", () => {
+  const roomId = randomId(6);
+  rememberRoomInUrl(roomId);
   connect(roomId, { isHost: true });
 });
 
-els.copyBtn.addEventListener("click", async () => {
+els.joinForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const code = normalizeCode(els.joinCode.value);
+  if (code.length !== 6) {
+    els.homeError.textContent = "Oda kodu 6 karakter olmalı.";
+    els.joinCode.focus();
+    return;
+  }
+  els.homeError.textContent = "";
+  rememberRoomInUrl(code);
+  connect(code, { isHost: false });
+});
+
+els.joinCode.addEventListener("input", () => {
+  els.homeError.textContent = "";
+});
+
+els.copyCode.addEventListener("click", async () => {
   try {
-    await navigator.clipboard.writeText(els.shareLink.value);
-    els.copyBtn.textContent = "Kopyalandı!";
-    setTimeout(() => (els.copyBtn.textContent = "Kopyala"), 1500);
+    await navigator.clipboard.writeText(els.roomCode.textContent);
+    els.copyCode.textContent = "kopyalandı";
+    setTimeout(() => (els.copyCode.textContent = "kodu kopyala"), 1500);
   } catch {
-    els.shareLink.select();
+    els.copyCode.textContent = "kopyalanamadı";
   }
 });
 
@@ -570,8 +594,8 @@ window.addEventListener("beforeunload", () => {
   if (topic && opponentId) publish({ t: "bye" });
 });
 
-const roomParam = new URLSearchParams(location.search).get("room");
-if (roomParam) {
-  els.createBtn.classList.add("hidden");
+// Old shared links still work, and so does reloading mid-game.
+const roomParam = normalizeCode(new URLSearchParams(location.search).get("room") ?? "");
+if (roomParam.length === 6) {
   connect(roomParam, { isHost: false });
 }

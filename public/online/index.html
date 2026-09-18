@@ -10,28 +10,47 @@
     <div class="page">
       <h1>Arkadaşınla Online Satranç</h1>
 
-      <section id="lobby" class="panel">
-        <button id="create-btn" type="button">Yeni Oyun Oluştur</button>
+      <section id="home" class="panel">
+        <button id="create-btn" type="button">Yeni Oyun Kur</button>
 
-        <div id="share-panel" class="hidden">
-          <p>Bu linki arkadaşına gönder, tıkladığında oyun otomatik başlayacak:</p>
-          <div class="share-row">
-            <input id="share-link" type="text" readonly />
-            <button id="copy-btn" type="button">Kopyala</button>
-          </div>
+        <div class="or-divider"><span>veya</span></div>
+
+        <form id="join-form" autocomplete="off">
+          <input
+            id="join-code"
+            type="text"
+            inputmode="latin"
+            maxlength="6"
+            placeholder="ODA KODU"
+            aria-label="Oda kodu"
+            spellcheck="false"
+          />
+          <button type="submit">Katıl</button>
+        </form>
+
+        <p id="home-error" class="status error"></p>
+      </section>
+
+      <section id="waiting" class="panel hidden">
+        <div class="loader" aria-hidden="true">
+          <img src="pieces/wN.svg" alt="" class="loader-piece" />
         </div>
 
-        <ol id="steps" class="steps hidden">
-          <li data-step="net"><span class="step-icon">○</span> Sunucuya bağlanılıyor</li>
-          <li data-step="wait"><span class="step-icon">○</span> <span id="step-wait-text">Rakip bekleniyor</span></li>
-          <li data-step="ready"><span class="step-icon">○</span> Oyun hazır</li>
-        </ol>
+        <p id="waiting-title" class="waiting-title">Rakip bekleniyor</p>
 
-        <ul id="transports" class="transports hidden"></ul>
+        <div id="code-box" class="code-box hidden">
+          <span class="code-label">Oda kodu</span>
+          <strong id="room-code"></strong>
+          <button id="copy-code" type="button" class="link-button">kodu kopyala</button>
+        </div>
 
-        <p id="wait-clock" class="status subtle"></p>
-        <p id="lobby-status" class="status"></p>
-        <p id="room-label" class="status subtle"></p>
+        <p id="waiting-hint" class="status subtle"></p>
+
+        <details id="details" class="details hidden">
+          <summary>bağlantı ayrıntıları</summary>
+          <ul id="transports" class="transports"></ul>
+        </details>
+
         <button id="retry-btn" type="button" class="hidden">Tekrar Dene</button>
       </section>
 
