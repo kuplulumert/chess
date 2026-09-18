@@ -12,8 +12,8 @@ const DEFAULT_BROKERS = [
   { label: "Mosquitto", url: "wss://test.mosquitto.org:8081/mqtt" },
 ];
 
-const WHITE_GLYPHS = { p: "♙", n: "♘", b: "♗", r: "♖", q: "♕", k: "♔" };
-const BLACK_GLYPHS = { p: "♟", n: "♞", b: "♝", r: "♜", q: "♛", k: "♚" };
+const PIECE_CODES = { p: "P", n: "N", b: "B", r: "R", q: "Q", k: "K" };
+const LATENCY_STORAGE_KEY = "online-chess-show-latency";
 
 const HELLO_INTERVAL_MS = 3000;
 const PING_INTERVAL_MS = 5000;
@@ -36,6 +36,7 @@ const els = {
   board: document.getElementById("board"),
   colorLabel: document.getElementById("color-label"),
   connLabel: document.getElementById("conn-label"),
+  latencyToggle: document.getElementById("latency-toggle"),
   turnLabel: document.getElementById("turn-label"),
   gameStatus: document.getElementById("game-status"),
   lastMove: document.getElementById("last-move"),
@@ -130,10 +131,12 @@ function render() {
     div.innerHTML = "";
     const piece = chess.get(square);
     if (piece) {
-      const span = document.createElement("span");
-      span.className = `piece ${piece.color === "w" ? "white-piece" : "black-piece"}`;
-      span.textContent = (piece.color === "w" ? WHITE_GLYPHS : BLACK_GLYPHS)[piece.type];
-      div.appendChild(span);
+      const img = document.createElement("img");
+      img.className = "piece";
+      img.src = `pieces/${piece.color}${PIECE_CODES[piece.type]}.svg`;
+      img.alt = "";
+      img.draggable = false;
+      div.appendChild(img);
     }
     const target = legalTargets.find((m) => m.to === square);
     if (target) {
@@ -365,7 +368,19 @@ function startGame() {
   startPinging();
 }
 
+let showLatency = readLatencyPreference();
+let lastLatency;
+
+function readLatencyPreference() {
+  try {
+    return localStorage.getItem(LATENCY_STORAGE_KEY) !== "off";
+  } catch {
+    return true; // private mode and friends: the readout is simply on
+  }
+}
+
 function updateConnLabel(latency) {
+  if (latency !== undefined) lastLatency = latency;
   const live = connectedClients().length;
   if (!opponentId || live === 0) {
     els.connLabel.className = "conn-lost";
@@ -373,7 +388,20 @@ function updateConnLabel(latency) {
     return;
   }
   els.connLabel.className = "conn-ok";
-  els.connLabel.textContent = `● bağlı${latency === undefined ? "" : ` · ${latency} ms`}`;
+  const suffix = showLatency && lastLatency !== undefined ? ` · ${lastLatency} ms` : "";
+  els.connLabel.textContent = `● bağlı${suffix}`;
+}
+
+function setLatencyVisible(visible) {
+  showLatency = visible;
+  els.latencyToggle.textContent = visible ? "gecikmeyi gizle" : "gecikmeyi göster";
+  els.latencyToggle.setAttribute("aria-pressed", String(visible));
+  try {
+    localStorage.setItem(LATENCY_STORAGE_KEY, visible ? "on" : "off");
+  } catch {
+    /* preference just won't persist */
+  }
+  updateConnLabel();
 }
 
 function startPinging() {
@@ -526,6 +554,9 @@ els.copyBtn.addEventListener("click", async () => {
 });
 
 els.retryBtn.addEventListener("click", () => location.reload());
+
+els.latencyToggle.addEventListener("click", () => setLatencyVisible(!showLatency));
+setLatencyVisible(showLatency);
 
 els.leaveBtn.addEventListener("click", () => {
   if (topic) publish({ t: "bye" });

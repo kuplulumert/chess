@@ -1,10 +1,20 @@
+/* Board squares, pieces and palette match the Opening Trainer's dark theme so
+   the two pages read as one app. */
 :root {
-  color-scheme: light dark;
-  --light-square: #f0d9b5;
-  --dark-square: #b58863;
-  --highlight: #f6f682;
-  --last-move: #cdd26a;
-  --move-dot: rgba(20, 20, 20, 0.35);
+  color-scheme: dark;
+  --light-square: #eef1f5;
+  --dark-square: #7c8fa3;
+  --highlight: rgba(92, 191, 138, 0.62);
+  --last-move: rgba(92, 191, 138, 0.3);
+  --move-dot: rgba(20, 22, 28, 0.34);
+  --bg: #14151a;
+  --panel-bg: #1b1d24;
+  --border: #2b2e38;
+  --text: #b8bcc6;
+  --text-h: #f0f1f4;
+  --text-muted: #888e9c;
+  --accent: #5cbf8a;
+  --danger: #e17070;
   --board-size: min(90vw, 520px);
 }
 
@@ -14,9 +24,9 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  background: #1e1e1e;
-  color: #eee;
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
   display: flex;
   justify-content: center;
   padding: 24px 12px 48px;
@@ -35,6 +45,7 @@ h1 {
   font-size: 1.4rem;
   text-align: center;
   margin: 0;
+  color: var(--text-h);
 }
 
 .panel {
@@ -46,17 +57,41 @@ h1 {
 }
 
 button {
-  font-size: 1rem;
-  padding: 10px 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 9px 16px;
   border-radius: 8px;
-  border: none;
-  background: #4a7c59;
-  color: white;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #14151a;
   cursor: pointer;
 }
 
 button:hover {
-  background: #3f6b4b;
+  filter: brightness(1.08);
+}
+
+.link-button {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 0.85rem;
+  padding: 7px 12px;
+}
+
+.link-button:hover {
+  filter: none;
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.game-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .hidden {
@@ -73,9 +108,9 @@ button:hover {
   flex: 1;
   padding: 8px;
   border-radius: 6px;
-  border: 1px solid #555;
-  background: #2a2a2a;
-  color: #eee;
+  border: 1px solid var(--border);
+  background: var(--panel-bg);
+  color: var(--text);
 }
 
 .status {
@@ -84,7 +119,7 @@ button:hover {
 }
 
 .subtle {
-  color: #aaa;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -100,22 +135,22 @@ button:hover {
 }
 
 .steps li {
-  color: #888;
+  color: var(--text-muted);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .steps li[data-state="active"] {
-  color: #eee;
+  color: var(--text-h);
 }
 
 .steps li[data-state="done"] {
-  color: #7bc08c;
+  color: var(--accent);
 }
 
 .steps li[data-state="failed"] {
-  color: #d98b8b;
+  color: var(--danger);
 }
 
 .step-icon {
@@ -140,7 +175,7 @@ button:hover {
   width: 100%;
   max-width: 340px;
   font-size: 0.85rem;
-  color: #888;
+  color: var(--text-muted);
 }
 
 .transports li {
@@ -150,24 +185,24 @@ button:hover {
 }
 
 .transports li[data-state="ok"] .t-state {
-  color: #cbd08a;
+  color: var(--text);
 }
 
 .transports li[data-state="paired"] .t-state {
-  color: #7bc08c;
+  color: var(--accent);
 }
 
 .transports li[data-state="fail"] .t-state {
-  color: #d98b8b;
+  color: var(--danger);
 }
 
 .conn-ok {
-  color: #7bc08c;
+  color: var(--accent);
   font-weight: 400;
 }
 
 .conn-lost {
-  color: #d98b8b;
+  color: var(--danger);
   font-weight: 400;
 }
 
@@ -215,32 +250,37 @@ button:hover {
   background: var(--dark-square);
 }
 
-.square.last-move {
-  background: var(--last-move) !important;
-}
-
-.square.selected {
-  background: var(--highlight) !important;
-}
-
-.square .piece {
-  line-height: 1;
+/* Tinting has to sit on top of the square rather than replace its colour,
+   otherwise a translucent highlight composites against the page background
+   and turns nearly black. */
+.square.last-move::after,
+.square.selected::after {
+  content: "";
+  position: absolute;
+  inset: 0;
   pointer-events: none;
 }
 
-.square .piece.white-piece {
-  color: #fff;
-  text-shadow:
-    0 0 2px #000,
-    0 0 2px #000;
+.square.last-move::after {
+  background: var(--last-move);
 }
 
-.square .piece.black-piece {
-  color: #111;
+.square.selected::after {
+  background: var(--highlight);
+}
+
+.square .piece {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  -webkit-user-drag: none;
 }
 
 .square .move-dot {
   position: absolute;
+  z-index: 1;
   width: 26%;
   height: 26%;
   border-radius: 50%;
@@ -250,6 +290,7 @@ button:hover {
 
 .square .capture-ring {
   position: absolute;
+  z-index: 1;
   inset: 6%;
   border: 4px solid var(--move-dot);
   border-radius: 50%;
