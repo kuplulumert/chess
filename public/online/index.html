@@ -22,19 +22,12 @@
         </div>
 
         <ol id="steps" class="steps hidden">
-          <li data-step="net"><span class="step-icon">○</span> Sinyal ağlarına bağlanılıyor</li>
+          <li data-step="net"><span class="step-icon">○</span> Sunucuya bağlanılıyor</li>
           <li data-step="wait"><span class="step-icon">○</span> <span id="step-wait-text">Rakip bekleniyor</span></li>
-          <li data-step="ready"><span class="step-icon">○</span> Bağlantı hazır</li>
+          <li data-step="ready"><span class="step-icon">○</span> Oyun hazır</li>
         </ol>
 
         <ul id="transports" class="transports hidden"></ul>
-
-        <ul id="ice-list" class="transports hidden">
-          <li data-ice="host"><span>Yerel ağ</span><span class="t-state">test ediliyor...</span></li>
-          <li data-ice="srflx"><span>Dış IP (STUN)</span><span class="t-state">test ediliyor...</span></li>
-          <li data-ice="relay"><span>Aktarma (TURN)</span><span class="t-state">test ediliyor...</span></li>
-        </ul>
-        <p id="ice-note" class="status subtle"></p>
 
         <p id="wait-clock" class="status subtle"></p>
         <p id="lobby-status" class="status"></p>

@@ -1,59 +1,23 @@
 import { Chess } from "./vendor/chess.esm.js";
-import {
-  joinNostr,
-  socketsNostr,
-  joinMqtt,
-  socketsMqtt,
-  joinTorrent,
-  socketsTorrent,
-} from "./vendor/trystero-multi.mjs";
+import mqtt from "./vendor/mqtt.esm.js";
 
-const APP_ID = "kuplulumert-online-chess";
+// Moves are a few bytes a minute, so the game doesn't need a peer-to-peer
+// link at all: it rides the same public MQTT brokers that are reachable from
+// ordinary home and mobile networks. That sidesteps NAT traversal entirely —
+// no STUN, no TURN relay, nothing to go silently missing mid-handshake.
+const TOPIC_PREFIX = "kuplulumert-online-chess/v1";
+const DEFAULT_BROKERS = [
+  { label: "EMQX", url: "wss://broker.emqx.io:8084/mqtt" },
+  { label: "HiveMQ", url: "wss://broker.hivemq.com:8884/mqtt" },
+  { label: "Mosquitto", url: "wss://test.mosquitto.org:8081/mqtt" },
+];
+
 const WHITE_GLYPHS = { p: "♙", n: "♘", b: "♗", r: "♖", q: "♕", k: "♔" };
 const BLACK_GLYPHS = { p: "♟", n: "♞", b: "♝", r: "♜", q: "♛", k: "♚" };
 
-// Peer discovery runs over every one of these at once: ISPs block these
-// networks inconsistently, so a player only needs one of the three to be
-// reachable. Whichever pairs the two players first carries the game.
-// Each transport needs its own app id: Trystero keys its shared peer registry
-// by (appId, peerId) and destroys the existing connection when a second one
-// registers under the same key, so transports sharing an app id tear each
-// other's connection down mid-handshake.
-//
-// Both players derive the same relay list from the app id, so widening nostr's
-// default of 5 raises the odds that a relay reachable from one player's ISP is
-// also reachable from the other's.
-const TRANSPORTS = [
-  { key: "mqtt", label: "MQTT", join: joinMqtt, getSockets: socketsMqtt, redundancy: 4 },
-  { key: "nostr", label: "Nostr", join: joinNostr, getSockets: socketsNostr, redundancy: 12 },
-  { key: "torrent", label: "Torrent", join: joinTorrent, getSockets: socketsTorrent, redundancy: 5 },
-];
-
-// The WebRTC link itself still needs a relay whenever both players sit behind
-// carrier-grade NAT, which is the norm on mobile data. Several are listed
-// because the free ones come and go, and a dead relay is silent: ICE simply
-// never completes and the pairing hangs.
-const RTC_CONFIG = {
-  iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
-    { urls: "stun:stun1.l.google.com:19302" },
-    { urls: "stun:stun.cloudflare.com:3478" },
-    { urls: "stun:freestun.net:3478" },
-    { urls: "turn:freestun.net:3478", username: "free", credential: "free" },
-    { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
-    { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
-    {
-      urls: "turn:openrelay.metered.ca:443?transport=tcp",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-  ],
-};
-
+const HELLO_INTERVAL_MS = 3000;
+const PING_INTERVAL_MS = 5000;
 const GUEST_TIMEOUT_MS = 90000;
-const PING_INTERVAL_MS = 4000;
-const RELAY_POLL_MS = 1000;
-const RELAY_GIVEUP_MS = 25000;
 
 const els = {
   lobby: document.getElementById("lobby"),
@@ -64,8 +28,6 @@ const els = {
   steps: document.getElementById("steps"),
   stepWaitText: document.getElementById("step-wait-text"),
   transports: document.getElementById("transports"),
-  iceList: document.getElementById("ice-list"),
-  iceNote: document.getElementById("ice-note"),
   waitClock: document.getElementById("wait-clock"),
   lobbyStatus: document.getElementById("lobby-status"),
   roomLabel: document.getElementById("room-label"),
@@ -81,17 +43,33 @@ const els = {
 };
 
 const chess = new Chess();
-const links = new Map(); // transport key -> {transport, room, action, peerId, stateEl}
+const clients = new Map(); // broker url -> {broker, client, stateEl, connected}
+const lastSeqFrom = new Map(); // sender id -> highest seq applied
+const selfId = randomId(8);
+
+let topic = null;
 let myColor = null;
+let opponentId = null;
+let seq = 0;
 let selected = null;
 let legalTargets = [];
 let lastMoveSquares = null;
 let squareEls = new Map();
 let gameStarted = false;
-let joinTimeoutId = null;
+let helloIntervalId = null;
 let pingIntervalId = null;
 let waitClockId = null;
-let relayPollId = null;
+let joinTimeoutId = null;
+let pendingPing = null;
+
+function randomId(length) {
+  const chars = "abcdefghjkmnpqrstuvwxyz23456789";
+  let id = "";
+  for (let i = 0; i < length; i++) {
+    id += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return id;
+}
 
 function setStep(name, state) {
   const li = els.steps.querySelector(`[data-step="${name}"]`);
@@ -101,25 +79,16 @@ function setStep(name, state) {
     state === "done" ? "✓" : state === "active" ? "•" : state === "failed" ? "✕" : "○";
 }
 
-function setTransportState(key, text, kind) {
-  const link = links.get(key);
-  if (!link) return;
-  link.stateEl.textContent = text;
-  link.stateEl.parentElement.dataset.state = kind;
+function setBrokerState(url, text, kind) {
+  const entry = clients.get(url);
+  if (!entry) return;
+  entry.stateEl.textContent = text;
+  entry.stateEl.parentElement.dataset.state = kind;
 }
 
 function showRetry(message) {
   els.lobbyStatus.textContent = message;
   els.retryBtn.classList.remove("hidden");
-}
-
-function randomRoomId(length = 6) {
-  const chars = "abcdefghjkmnpqrstuvwxyz23456789";
-  let id = "";
-  for (let i = 0; i < length; i++) {
-    id += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return id;
 }
 
 function squareColorClass(square) {
@@ -205,12 +174,23 @@ function clearSelection() {
   legalTargets = [];
 }
 
-function pairedLinks() {
-  return [...links.values()].filter((link) => link.peerId);
+function connectedClients() {
+  return [...clients.values()].filter((entry) => entry.connected);
+}
+
+function publish(message) {
+  const payload = JSON.stringify({ ...message, id: selfId, seq: ++seq });
+  for (const entry of connectedClients()) {
+    try {
+      entry.client.publish(topic, payload, { qos: 0 });
+    } catch (err) {
+      console.error(`${entry.broker.label} yayınlanamadı:`, err);
+    }
+  }
 }
 
 function onSquareClick(square) {
-  if (!gameStarted || pairedLinks().length === 0 || chess.isGameOver()) return;
+  if (!gameStarted || chess.isGameOver()) return;
   if (chess.turn() !== myColor) return;
 
   const piece = chess.get(square);
@@ -264,21 +244,16 @@ function makeMove(from, to) {
   lastMoveSquares = { from, to };
   render();
   els.lastMove.textContent = `Oynadığın hamle: ${move.san}`;
-
-  // Sent over every paired transport; the index makes the duplicates harmless.
-  for (const link of pairedLinks()) {
-    link.action.send({ index, from, to, promotion: promotion ?? null });
-  }
+  publish({ t: "move", index, from, to, promotion: promotion ?? null });
 }
 
-function applyRemoteMove({ index, from, to, promotion }) {
-  if (index !== chess.history().length) return; // already applied via another transport
+function applyMove({ index, from, to, promotion }) {
+  if (index !== chess.history().length) return; // out of order or already applied
   let move;
   try {
     move = chess.move({ from, to, promotion: promotion ?? undefined });
   } catch (err) {
-    console.error("Rakipten gelen hamle uygulanamadı:", err);
-    els.gameStatus.textContent = "Hamleler senkron dışı kaldı, yeni oyun başlatın.";
+    console.error("Gelen hamle uygulanamadı:", err);
     return;
   }
   clearSelection();
@@ -287,14 +262,99 @@ function applyRemoteMove({ index, from, to, promotion }) {
   els.lastMove.textContent = `Rakibin hamlesi: ${move.san}`;
 }
 
+// A reconnecting opponent starts from an empty board, so whoever has the
+// longer history replays it rather than the two drifting apart.
+function applySync(moves) {
+  if (!Array.isArray(moves) || moves.length <= chess.history().length) return;
+  // Validated on a throwaway board first so a malformed list can't leave the
+  // real one half-updated, then replayed as moves rather than loaded as a FEN:
+  // the move history has to stay intact because it indexes every later move.
+  const replay = new Chess();
+  try {
+    for (const move of moves) {
+      replay.move({ from: move.from, to: move.to, promotion: move.promotion ?? undefined });
+    }
+  } catch (err) {
+    console.error("Oyun durumu eşitlenemedi:", err);
+    return;
+  }
+  chess.reset();
+  for (const move of moves) {
+    chess.move({ from: move.from, to: move.to, promotion: move.promotion ?? undefined });
+  }
+  const last = moves[moves.length - 1];
+  lastMoveSquares = { from: last.from, to: last.to };
+  clearSelection();
+  render();
+  els.lastMove.textContent = "Oyun rakibinle eşitlendi.";
+}
+
+function historyPayload() {
+  return chess.history({ verbose: true }).map((move) => ({
+    from: move.from,
+    to: move.to,
+    promotion: move.promotion ?? null,
+  }));
+}
+
+function handleMessage(raw) {
+  let message;
+  try {
+    message = JSON.parse(raw);
+  } catch {
+    return;
+  }
+  if (!message || message.id === selfId) return;
+
+  // Same payload arrives once per broker; the sender's own counter drops the copies.
+  const seen = lastSeqFrom.get(message.id) ?? 0;
+  if (typeof message.seq === "number") {
+    if (message.seq <= seen) return;
+    lastSeqFrom.set(message.id, message.seq);
+  }
+
+  if (message.t === "hello") {
+    if (message.side === myColor) return; // another window of my own side
+    // Staying silent once paired matters: answering every hello would bounce
+    // one back and forth between the two players for the rest of the game.
+    if (message.id === opponentId) return;
+    // A reload gives the opponent a new id, so a new one replaces the old.
+    pairWith(message.id);
+    publish({ t: "hello", side: myColor });
+    if (chess.history().length > 0) publish({ t: "sync", moves: historyPayload() });
+    return;
+  }
+
+  if (message.id !== opponentId) return;
+
+  if (message.t === "move") applyMove(message);
+  else if (message.t === "sync") applySync(message.moves);
+  else if (message.t === "ping") publish({ t: "pong", ts: message.ts });
+  else if (message.t === "pong" && pendingPing === message.ts) {
+    updateConnLabel(Date.now() - message.ts);
+    pendingPing = null;
+  } else if (message.t === "bye") {
+    opponentId = null;
+    updateConnLabel();
+    els.gameStatus.textContent = "Rakibin ayrıldı. Aynı linki tekrar açarsa devam edersiniz.";
+    startHellos();
+  }
+}
+
+function pairWith(id) {
+  opponentId = id;
+  clearTimeout(joinTimeoutId);
+  clearInterval(helloIntervalId);
+  helloIntervalId = null;
+  startGame();
+}
+
 function startGame() {
+  updateConnLabel();
   if (gameStarted) return;
   gameStarted = true;
-  clearTimeout(joinTimeoutId);
   clearInterval(waitClockId);
-  clearInterval(relayPollId);
   els.waitClock.textContent = "";
-  setStep("net", "done");
   setStep("wait", "done");
   setStep("ready", "done");
   els.lobby.classList.add("hidden");
@@ -302,136 +362,43 @@ function startGame() {
   buildBoard(myColor);
   render();
   els.lastMove.textContent = "Oyun başladı. Beyaz başlar.";
-  updateConnLabel();
   startPinging();
 }
 
 function updateConnLabel(latency) {
-  const paired = pairedLinks();
-  if (paired.length === 0) {
+  const live = connectedClients().length;
+  if (!opponentId || live === 0) {
     els.connLabel.className = "conn-lost";
-    els.connLabel.textContent = "● bağlantı koptu";
+    els.connLabel.textContent = live === 0 ? "● sunucu bağlantısı yok" : "● rakip bekleniyor";
     return;
   }
-  const via = paired.map((link) => link.transport.label.toLowerCase()).join(", ");
   els.connLabel.className = "conn-ok";
-  els.connLabel.textContent = `● ${via}${latency === undefined ? "" : ` · ${latency} ms`}`;
+  els.connLabel.textContent = `● bağlı${latency === undefined ? "" : ` · ${latency} ms`}`;
 }
 
 function startPinging() {
   clearInterval(pingIntervalId);
-  pingIntervalId = setInterval(async () => {
-    const [link] = pairedLinks();
-    if (!link) {
+  pingIntervalId = setInterval(() => {
+    if (!opponentId) {
       updateConnLabel();
       return;
     }
-    try {
-      updateConnLabel(await link.room.ping(link.peerId));
-    } catch {
-      updateConnLabel();
-    }
+    pendingPing = Date.now();
+    publish({ t: "ping", ts: pendingPing });
   }, PING_INTERVAL_MS);
 }
 
-function countOpenSockets(getSockets) {
-  try {
-    const sockets = getSockets();
-    return Object.values(sockets ?? {}).filter((s) => s && s.readyState === 1).length;
-  } catch {
-    return 0;
-  }
-}
-
-function watchRelays() {
-  const startedAt = Date.now();
-  relayPollId = setInterval(() => {
-    let anyOnline = false;
-    for (const link of links.values()) {
-      if (link.peerId) continue;
-      const open = countOpenSockets(link.transport.getSockets);
-      if (open > 0) {
-        anyOnline = true;
-        setTransportState(link.transport.key, `ağa bağlı (${open})`, "ok");
-      } else if (Date.now() - startedAt > RELAY_GIVEUP_MS) {
-        setTransportState(link.transport.key, "ulaşılamıyor", "fail");
-      }
-    }
-
-    if (anyOnline) {
-      setStep("net", "done");
-    } else if (Date.now() - startedAt > RELAY_GIVEUP_MS) {
-      setStep("net", "failed");
-      els.lobbyStatus.textContent =
-        "Hiçbir sinyal ağına ulaşılamadı — ağın bu bağlantıları engelliyor olabilir. Farklı bir ağ (örneğin mobil veri) dene.";
-    }
-  }, RELAY_POLL_MS);
-}
-
-// Peer discovery working while pairing never completes means WebRTC itself is
-// the problem, so gather candidates against the same ICE config and report
-// which kinds this network can actually produce. A missing relay candidate is
-// the difference between "works on one wifi" and "works anywhere".
-function testIce() {
-  const rows = {
-    host: els.iceList.querySelector('[data-ice="host"] .t-state'),
-    srflx: els.iceList.querySelector('[data-ice="srflx"] .t-state'),
-    relay: els.iceList.querySelector('[data-ice="relay"] .t-state'),
-  };
-  const seen = { host: false, srflx: false, relay: false };
-
-  const mark = (type, text) => {
-    const row = rows[type];
-    if (!row) return;
-    row.textContent = text;
-    row.parentElement.dataset.state = seen[type] ? "paired" : "fail";
-  };
-
-  let pc;
-  try {
-    pc = new RTCPeerConnection(RTC_CONFIG);
-  } catch (err) {
-    console.error("WebRTC başlatılamadı:", err);
-    return;
-  }
-  pc.createDataChannel("probe");
-
-  const finish = () => {
-    for (const type of ["host", "srflx", "relay"]) {
-      if (!seen[type]) mark(type, "yok");
-    }
-    if (!seen.relay) {
-      els.iceNote.textContent =
-        "Aktarma (TURN) sunucusuna ulaşılamadı: iki oyuncu farklı ağlardaysa bağlantı kurulamayabilir.";
-    }
-    try {
-      pc.close();
-    } catch {
-      /* already closed */
-    }
-  };
-
-  const timer = setTimeout(finish, 15000);
-
-  pc.onicecandidate = ({ candidate }) => {
-    if (!candidate) {
-      clearTimeout(timer);
-      finish();
+function startHellos() {
+  if (helloIntervalId) return;
+  publish({ t: "hello", side: myColor });
+  helloIntervalId = setInterval(() => {
+    if (opponentId) {
+      clearInterval(helloIntervalId);
+      helloIntervalId = null;
       return;
     }
-    const type = candidate.type ?? / typ (\w+)/.exec(candidate.candidate)?.[1];
-    if (!(type in seen)) return;
-    seen[type] = true;
-    mark(type, type === "relay" && candidate.url ? `çalışıyor (${candidate.url})` : "çalışıyor");
-  };
-
-  pc.createOffer()
-    .then((offer) => pc.setLocalDescription(offer))
-    .catch((err) => {
-      console.error("ICE testi başarısız:", err);
-      clearTimeout(timer);
-      finish();
-    });
+    publish({ t: "hello", side: myColor });
+  }, HELLO_INTERVAL_MS);
 }
 
 function startWaitClock() {
@@ -441,100 +408,109 @@ function startWaitClock() {
   }, 1000);
 }
 
+function brokerList() {
+  const override = new URLSearchParams(location.search).get("broker");
+  return override ? [{ label: "Test", url: override }] : DEFAULT_BROKERS;
+}
+
 function connect(roomId, { isHost }) {
   myColor = isHost ? "w" : "b";
+  topic = `${TOPIC_PREFIX}/${roomId}`;
   els.steps.classList.remove("hidden");
   els.transports.classList.remove("hidden");
-  els.iceList.classList.remove("hidden");
   els.stepWaitText.textContent = isHost ? "Rakip bekleniyor" : "Oyun aranıyor";
   els.roomLabel.textContent = `Oda kodu: ${roomId}`;
   setStep("net", "active");
   setStep("wait", "active");
 
-  for (const transport of TRANSPORTS) {
+  for (const broker of brokerList()) {
     const li = document.createElement("li");
     li.dataset.state = "pending";
     const name = document.createElement("span");
-    name.textContent = transport.label;
+    name.textContent = broker.label;
     const state = document.createElement("span");
     state.className = "t-state";
     state.textContent = "bağlanıyor...";
     li.append(name, state);
     els.transports.appendChild(li);
 
-    let room;
+    let client;
     try {
-      room = transport.join(
-        {
-          appId: `${APP_ID}-${transport.key}`,
-          rtcConfig: RTC_CONFIG,
-          relayConfig: { redundancy: transport.redundancy },
-        },
-        roomId,
-        {
-          onJoinError: (details) => {
-            console.error(`${transport.key} odaya katılamadı:`, details);
-            setTransportState(transport.key, "hata", "fail");
-          },
-        },
-      );
+      client = mqtt.connect(broker.url, {
+        clientId: `${selfId}-${randomId(4)}`,
+        clean: true,
+        connectTimeout: 10000,
+        reconnectPeriod: 5000,
+        keepalive: 30,
+      });
     } catch (err) {
-      console.error(`${transport.key} başlatılamadı:`, err);
+      console.error(`${broker.label} başlatılamadı:`, err);
       state.textContent = "başlatılamadı";
       li.dataset.state = "fail";
       continue;
     }
 
-    const action = room.makeAction("move");
-    const link = { transport, room, action, peerId: null, stateEl: state };
-    links.set(transport.key, link);
+    const entry = { broker, client, stateEl: state, connected: false };
+    clients.set(broker.url, entry);
 
-    action.onMessage = (data, context) => {
-      if (context.peerId !== link.peerId) return;
-      applyRemoteMove(data);
-    };
-
-    room.onPeerJoin = (peerId) => {
-      if (link.peerId) return; // two players per game; ignore extra joiners
-      link.peerId = peerId;
-      setTransportState(transport.key, "rakip bağlandı", "paired");
-      startGame();
+    client.on("connect", () => {
+      entry.connected = true;
+      setBrokerState(broker.url, "bağlı", "ok");
+      setStep("net", "done");
+      client.subscribe(topic, { qos: 0 }, (err) => {
+        if (err) {
+          console.error(`${broker.label} konuya abone olunamadı:`, err);
+          setBrokerState(broker.url, "abone olunamadı", "fail");
+          return;
+        }
+        startHellos();
+      });
       updateConnLabel();
-    };
+    });
 
-    room.onPeerLeave = (peerId) => {
-      if (peerId !== link.peerId) return;
-      link.peerId = null;
-      setTransportState(transport.key, "rakip ayrıldı", "fail");
+    client.on("message", (_topic, payload) => handleMessage(payload.toString()));
+
+    client.on("error", (err) => {
+      console.error(`${broker.label} hatası:`, err.message ?? err);
+      setBrokerState(broker.url, "ulaşılamıyor", "fail");
+    });
+
+    client.on("close", () => {
+      if (!entry.connected) return;
+      entry.connected = false;
+      setBrokerState(broker.url, "bağlantı koptu", "fail");
       updateConnLabel();
-      if (pairedLinks().length === 0) {
-        els.gameStatus.textContent = "Rakibin ayrıldı. Aynı linki tekrar açarsa bağlanır.";
-      }
-    };
+    });
   }
 
-  watchRelays();
-  testIce();
   startWaitClock();
   els.lobbyStatus.textContent = isHost
-    ? "Link hazır. Arkadaşın linke tıkladığı anda burada göreceksin."
+    ? "Link hazır. Arkadaşın linke tıkladığı anda oyun başlayacak."
     : "Oyunu açan arkadaşın aranıyor...";
+
+  setTimeout(() => {
+    if (connectedClients().length === 0) {
+      setStep("net", "failed");
+      showRetry("Hiçbir sunucuya bağlanılamadı. Farklı bir ağ (örneğin mobil veri) dene.");
+    }
+  }, 20000);
 
   if (!isHost) {
     joinTimeoutId = setTimeout(() => {
+      if (opponentId) return;
       clearInterval(waitClockId);
       setStep("wait", "failed");
-      showRetry(
-        "Rakip bulunamadı. Arkadaşının sayfayı açık tuttuğundan emin ol; yukarıdaki listede hangi ağların bağlandığı görünüyor.",
-      );
+      showRetry("Rakip bulunamadı. Arkadaşının sayfayı açık tuttuğundan emin ol, sonra tekrar dene.");
     }, GUEST_TIMEOUT_MS);
   }
 }
 
 els.createBtn.addEventListener("click", () => {
-  const roomId = randomRoomId();
+  const roomId = randomId(6);
   els.createBtn.classList.add("hidden");
-  els.shareLink.value = `${location.origin}${location.pathname}?room=${roomId}`;
+  const url = new URL(location.href);
+  url.searchParams.set("room", roomId);
+  els.shareLink.value = url.toString();
   els.sharePanel.classList.remove("hidden");
   connect(roomId, { isHost: true });
 });
@@ -552,8 +528,15 @@ els.copyBtn.addEventListener("click", async () => {
 els.retryBtn.addEventListener("click", () => location.reload());
 
 els.leaveBtn.addEventListener("click", () => {
-  for (const link of links.values()) link.room.leave();
-  location.href = location.pathname;
+  if (topic) publish({ t: "bye" });
+  for (const entry of clients.values()) entry.client.end(true);
+  const url = new URL(location.href);
+  url.searchParams.delete("room");
+  location.href = url.toString();
+});
+
+window.addEventListener("beforeunload", () => {
+  if (topic && opponentId) publish({ t: "bye" });
 });
 
 const roomParam = new URLSearchParams(location.search).get("room");

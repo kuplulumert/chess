@@ -9,9 +9,20 @@ and tells you when you've gone off book.
 There's also a separate, unrelated mini-site at
 [`/online/`](https://kuplulumert.github.io/chess/online/) ([source](public/online)) for
 playing a live game of chess against a friend: one person opens it, shares the
-generated link, and whoever opens that link plays the other side. No accounts, no
-server of our own — it's a static page that pairs the two browsers directly over
-WebRTC.
+generated link, and whoever opens that link plays the other side. No accounts and no
+server of our own — it's a static page, and the two browsers exchange moves through
+public MQTT brokers (EMQX, HiveMQ, Mosquitto), subscribing to a topic named after the
+random room code in the link.
+
+A peer-to-peer link would have been the obvious choice, and the page did use WebRTC at
+first, but it can't be relied on here: when both players sit behind carrier-grade NAT —
+the norm on mobile and many home connections — a direct connection needs a TURN relay,
+and free public TURN servers no longer answer. Chess moves are a few bytes each, so
+routing them through a message broker costs nothing and works on any network that
+allows an outbound WebSocket. All three brokers are used at once and duplicate messages
+are discarded, so one broker being blocked or down doesn't stop the game. Note that
+those brokers are public: a game's moves aren't private to anyone who knows the room
+code.
 
 ## How it works
 
