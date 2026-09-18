@@ -10,6 +10,7 @@ const els = {
   shareLink: document.getElementById("share-link"),
   copyBtn: document.getElementById("copy-btn"),
   lobbyStatus: document.getElementById("lobby-status"),
+  retryBtn: document.getElementById("retry-btn"),
   game: document.getElementById("game"),
   board: document.getElementById("board"),
   colorLabel: document.getElementById("color-label"),
@@ -18,12 +19,24 @@ const els = {
   leaveBtn: document.getElementById("leave-btn"),
 };
 
+// STUN alone fails whenever both players are behind carrier-grade NAT (common
+// on mobile data), so a TURN relay is required for the connection to succeed
+// reliably. Open Relay Project's free TURN server is meant for exactly this.
 const ICE_CONFIG = {
   iceServers: [
     { urls: "stun:stun.l.google.com:19302" },
     { urls: "stun:stun1.l.google.com:19302" },
+    { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
+    { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
+    {
+      urls: "turn:openrelay.metered.ca:443?transport=tcp",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
   ],
 };
+
+const CONNECT_TIMEOUT_MS = 20000;
 
 const chess = new Chess();
 let peer = null;
@@ -32,6 +45,24 @@ let myColor = null; // 'w' | 'b'
 let selected = null;
 let legalTargets = [];
 let squareEls = new Map();
+let connectTimeoutId = null;
+
+function armConnectTimeout(onTimeout) {
+  clearConnectTimeout();
+  connectTimeoutId = setTimeout(onTimeout, CONNECT_TIMEOUT_MS);
+}
+
+function clearConnectTimeout() {
+  if (connectTimeoutId) {
+    clearTimeout(connectTimeoutId);
+    connectTimeoutId = null;
+  }
+}
+
+function showRetry(message) {
+  els.lobbyStatus.textContent = message;
+  els.retryBtn.classList.remove("hidden");
+}
 
 function randomRoomId(length = 6) {
   const chars = "abcdefghjkmnpqrstuvwxyz23456789";
@@ -200,6 +231,7 @@ function setupConnection(connection, { announceReady }) {
   conn = connection;
 
   conn.on("open", () => {
+    clearConnectTimeout();
     showGame();
     if (announceReady) {
       els.lobbyStatus.textContent = "";
@@ -239,11 +271,16 @@ function startHost() {
   });
 
   peer.on("connection", (connection) => {
+    els.lobbyStatus.textContent = "Arkadaşınla bağlantı kuruluyor...";
+    armConnectTimeout(() => {
+      showRetry("Bağlantı çok uzun sürdü. Arkadaşın linke tekrar tıklamayı dener misin?");
+    });
     setupConnection(connection, { announceReady: true });
   });
 
   peer.on("error", (err) => {
     console.error(err);
+    clearConnectTimeout();
     if (err.type === "unavailable-id") {
       els.createBtn.disabled = false;
       els.lobbyStatus.textContent = "Oda oluşturulamadı, tekrar deneniyor...";
@@ -251,15 +288,20 @@ function startHost() {
       startHost();
       return;
     }
-    els.lobbyStatus.textContent = "Bağlantı sunucusuna ulaşılamadı. Sayfayı yenileyip tekrar dene.";
+    showRetry("Bağlantı sunucusuna ulaşılamadı.");
   });
 }
 
 function startGuest(roomId) {
   myColor = "b";
-  els.lobbyStatus.textContent = "Oyuna bağlanılıyor...";
+  els.lobbyStatus.textContent = "Oyuna bağlanılıyor... (biraz sürebilir)";
 
   peer = new Peer(undefined, { config: ICE_CONFIG });
+
+  armConnectTimeout(() => {
+    if (peer) peer.destroy();
+    showRetry("Bağlantı çok uzun sürdü. Tekrar dene, ya da oyunu açan arkadaşının sayfayı hâlâ açık tuttuğundan emin ol.");
+  });
 
   peer.on("open", () => {
     const connection = peer.connect(roomId, { reliable: true });
@@ -269,10 +311,12 @@ function startGuest(roomId) {
   peer.on("error", (err) => {
     console.error(err);
     if (err.type === "peer-unavailable") {
-      els.lobbyStatus.textContent = "Bu oyun bulunamadı. Link geçersiz olabilir ya da rakip ayrıldı.";
+      clearConnectTimeout();
+      showRetry("Bu oyun bulunamadı. Link geçersiz olabilir ya da rakip ayrıldı.");
       return;
     }
-    els.lobbyStatus.textContent = "Bağlantı sunucusuna ulaşılamadı. Sayfayı yenileyip tekrar dene.";
+    clearConnectTimeout();
+    showRetry("Bağlantı sunucusuna ulaşılamadı.");
   });
 }
 
@@ -286,6 +330,10 @@ els.copyBtn.addEventListener("click", async () => {
   } catch {
     els.shareLink.select();
   }
+});
+
+els.retryBtn.addEventListener("click", () => {
+  location.reload();
 });
 
 els.leaveBtn.addEventListener("click", () => {
