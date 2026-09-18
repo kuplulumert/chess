@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arkadaşınla Online Satranç</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="page">
+      <h1>Arkadaşınla Online Satranç</h1>
+
+      <section id="lobby" class="panel">
+        <button id="create-btn" type="button">Yeni Oyun Oluştur</button>
+
+        <div id="share-panel" class="hidden">
+          <p>Bu linki arkadaşına gönder, tıkladığında oyun otomatik başlayacak:</p>
+          <div class="share-row">
+            <input id="share-link" type="text" readonly />
+            <button id="copy-btn" type="button">Kopyala</button>
+          </div>
+        </div>
+
+        <p id="lobby-status" class="status"></p>
+      </section>
+
+      <section id="game" class="hidden">
+        <div class="status-bar">
+          <span id="color-label"></span>
+          <span id="turn-label"></span>
+        </div>
+
+        <div id="board" class="board"></div>
+
+        <p id="game-status" class="status"></p>
+
+        <button id="leave-btn" type="button">Ana Sayfaya Dön</button>
+      </section>
+    </div>
+
+    <script src="vendor/peerjs.min.js"></script>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

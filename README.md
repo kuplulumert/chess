@@ -6,6 +6,13 @@ A focused chess app for one thing only: memorizing openings. Pick a line, choose
 colour, and play the book moves from memory — the app plays the opponent's replies
 and tells you when you've gone off book.
 
+There's also a separate, unrelated mini-site at
+[`/online/`](https://kuplulumert.github.io/chess/online/) ([source](public/online)) for
+playing a live game of chess against a friend: one person opens it, shares the
+generated link, and whoever opens that link plays the other side. No accounts, no
+server of our own — it's a static page that pairs the two browsers directly over
+WebRTC.
+
 ## How it works
 
 - **Quiz mode** — you play every move for your colour. A move that isn't the book
