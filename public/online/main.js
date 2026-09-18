@@ -15,18 +15,31 @@ const BLACK_GLYPHS = { p: "♟", n: "♞", b: "♝", r: "♜", q: "♛", k: "♚
 // Peer discovery runs over every one of these at once: ISPs block these
 // networks inconsistently, so a player only needs one of the three to be
 // reachable. Whichever pairs the two players first carries the game.
+// Each transport needs its own app id: Trystero keys its shared peer registry
+// by (appId, peerId) and destroys the existing connection when a second one
+// registers under the same key, so transports sharing an app id tear each
+// other's connection down mid-handshake.
+//
+// Both players derive the same relay list from the app id, so widening nostr's
+// default of 5 raises the odds that a relay reachable from one player's ISP is
+// also reachable from the other's.
 const TRANSPORTS = [
-  { key: "mqtt", label: "MQTT", join: joinMqtt, getSockets: socketsMqtt },
-  { key: "nostr", label: "Nostr", join: joinNostr, getSockets: socketsNostr },
-  { key: "torrent", label: "Torrent", join: joinTorrent, getSockets: socketsTorrent },
+  { key: "mqtt", label: "MQTT", join: joinMqtt, getSockets: socketsMqtt, redundancy: 4 },
+  { key: "nostr", label: "Nostr", join: joinNostr, getSockets: socketsNostr, redundancy: 12 },
+  { key: "torrent", label: "Torrent", join: joinTorrent, getSockets: socketsTorrent, redundancy: 5 },
 ];
 
 // The WebRTC link itself still needs a relay whenever both players sit behind
-// carrier-grade NAT, which is the norm on mobile data.
+// carrier-grade NAT, which is the norm on mobile data. Several are listed
+// because the free ones come and go, and a dead relay is silent: ICE simply
+// never completes and the pairing hangs.
 const RTC_CONFIG = {
   iceServers: [
     { urls: "stun:stun.l.google.com:19302" },
     { urls: "stun:stun1.l.google.com:19302" },
+    { urls: "stun:stun.cloudflare.com:3478" },
+    { urls: "stun:freestun.net:3478" },
+    { urls: "turn:freestun.net:3478", username: "free", credential: "free" },
     { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
     { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
     {
@@ -51,6 +64,8 @@ const els = {
   steps: document.getElementById("steps"),
   stepWaitText: document.getElementById("step-wait-text"),
   transports: document.getElementById("transports"),
+  iceList: document.getElementById("ice-list"),
+  iceNote: document.getElementById("ice-note"),
   waitClock: document.getElementById("wait-clock"),
   lobbyStatus: document.getElementById("lobby-status"),
   roomLabel: document.getElementById("room-label"),
@@ -353,6 +368,72 @@ function watchRelays() {
   }, RELAY_POLL_MS);
 }
 
+// Peer discovery working while pairing never completes means WebRTC itself is
+// the problem, so gather candidates against the same ICE config and report
+// which kinds this network can actually produce. A missing relay candidate is
+// the difference between "works on one wifi" and "works anywhere".
+function testIce() {
+  const rows = {
+    host: els.iceList.querySelector('[data-ice="host"] .t-state'),
+    srflx: els.iceList.querySelector('[data-ice="srflx"] .t-state'),
+    relay: els.iceList.querySelector('[data-ice="relay"] .t-state'),
+  };
+  const seen = { host: false, srflx: false, relay: false };
+
+  const mark = (type, text) => {
+    const row = rows[type];
+    if (!row) return;
+    row.textContent = text;
+    row.parentElement.dataset.state = seen[type] ? "paired" : "fail";
+  };
+
+  let pc;
+  try {
+    pc = new RTCPeerConnection(RTC_CONFIG);
+  } catch (err) {
+    console.error("WebRTC başlatılamadı:", err);
+    return;
+  }
+  pc.createDataChannel("probe");
+
+  const finish = () => {
+    for (const type of ["host", "srflx", "relay"]) {
+      if (!seen[type]) mark(type, "yok");
+    }
+    if (!seen.relay) {
+      els.iceNote.textContent =
+        "Aktarma (TURN) sunucusuna ulaşılamadı: iki oyuncu farklı ağlardaysa bağlantı kurulamayabilir.";
+    }
+    try {
+      pc.close();
+    } catch {
+      /* already closed */
+    }
+  };
+
+  const timer = setTimeout(finish, 15000);
+
+  pc.onicecandidate = ({ candidate }) => {
+    if (!candidate) {
+      clearTimeout(timer);
+      finish();
+      return;
+    }
+    const type = candidate.type ?? / typ (\w+)/.exec(candidate.candidate)?.[1];
+    if (!(type in seen)) return;
+    seen[type] = true;
+    mark(type, type === "relay" && candidate.url ? `çalışıyor (${candidate.url})` : "çalışıyor");
+  };
+
+  pc.createOffer()
+    .then((offer) => pc.setLocalDescription(offer))
+    .catch((err) => {
+      console.error("ICE testi başarısız:", err);
+      clearTimeout(timer);
+      finish();
+    });
+}
+
 function startWaitClock() {
   const startedAt = Date.now();
   waitClockId = setInterval(() => {
@@ -364,6 +445,7 @@ function connect(roomId, { isHost }) {
   myColor = isHost ? "w" : "b";
   els.steps.classList.remove("hidden");
   els.transports.classList.remove("hidden");
+  els.iceList.classList.remove("hidden");
   els.stepWaitText.textContent = isHost ? "Rakip bekleniyor" : "Oyun aranıyor";
   els.roomLabel.textContent = `Oda kodu: ${roomId}`;
   setStep("net", "active");
@@ -382,12 +464,20 @@ function connect(roomId, { isHost }) {
 
     let room;
     try {
-      room = transport.join({ appId: APP_ID, rtcConfig: RTC_CONFIG }, roomId, {
-        onJoinError: (details) => {
-          console.error(`${transport.key} odaya katılamadı:`, details);
-          setTransportState(transport.key, "hata", "fail");
+      room = transport.join(
+        {
+          appId: `${APP_ID}-${transport.key}`,
+          rtcConfig: RTC_CONFIG,
+          relayConfig: { redundancy: transport.redundancy },
         },
-      });
+        roomId,
+        {
+          onJoinError: (details) => {
+            console.error(`${transport.key} odaya katılamadı:`, details);
+            setTransportState(transport.key, "hata", "fail");
+          },
+        },
+      );
     } catch (err) {
       console.error(`${transport.key} başlatılamadı:`, err);
       state.textContent = "başlatılamadı";
@@ -424,6 +514,7 @@ function connect(roomId, { isHost }) {
   }
 
   watchRelays();
+  testIce();
   startWaitClock();
   els.lobbyStatus.textContent = isHost
     ? "Link hazır. Arkadaşın linke tıkladığı anda burada göreceksin."
